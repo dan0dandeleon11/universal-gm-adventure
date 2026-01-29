@@ -28,6 +28,14 @@ import {
     formatQueueTime,
     formatStatChange
 } from './actionQueue.js';
+import {
+    generateDynamicActions,
+    executeAction,
+    isLocationLocked,
+    lockLocation,
+    unlockLocation,
+    getFallbackActions
+} from './dynamicGenerator.js';
 
 // Store unsubscribe function
 let queueUnsubscribe = null;
@@ -78,6 +86,7 @@ export function createGMModeTabHTML() {
  */
 function createLocationHTML(location, timeOfDay) {
     const electronics = getElectronicsForLocation(location);
+    const isLocked = isLocationLocked(location.id);
 
     return `
         <div class="rpg-gm-location-header">
@@ -86,9 +95,18 @@ function createLocationHTML(location, timeOfDay) {
                 <span class="rpg-gm-location-name">${escapeHtml(location.name)}</span>
                 <span class="rpg-gm-time-badge">${formatTimeOfDay(timeOfDay)}</span>
             </div>
-            <button id="rpg-gm-change-location" class="rpg-btn-icon" title="Change Location">
-                <i class="fa-solid fa-right-left"></i>
-            </button>
+            <div class="rpg-gm-location-buttons">
+                <button id="rpg-gm-lock-location" class="rpg-btn-icon ${isLocked ? 'locked' : ''}"
+                        title="${isLocked ? 'Unlock Location' : 'Lock Location'}" data-id="${location.id}">
+                    <i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-lock-open'}"></i>
+                </button>
+                <button id="rpg-gm-refresh-actions" class="rpg-btn-icon" title="Generate New Actions">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </button>
+                <button id="rpg-gm-change-location" class="rpg-btn-icon" title="Change Location">
+                    <i class="fa-solid fa-right-left"></i>
+                </button>
+            </div>
         </div>
 
         <div class="rpg-gm-location-desc">${escapeHtml(location.description)}</div>
@@ -307,6 +325,69 @@ export function setupGMModeEvents() {
         e.preventDefault();
         console.log('[GM Mode UI] Change location clicked');
         showLocationPicker();
+    });
+
+    // Lock/unlock location button
+    $(document).off('click.gm-lock', '#rpg-gm-lock-location');
+    $(document).on('click.gm-lock', '#rpg-gm-lock-location', function(e) {
+        e.preventDefault();
+        const locationId = $(this).data('id');
+        const isLocked = $(this).hasClass('locked');
+
+        if (isLocked) {
+            unlockLocation(locationId);
+            $(this).removeClass('locked').attr('title', 'Lock Location')
+                .find('i').removeClass('fa-lock').addClass('fa-lock-open');
+            toastr.info('Location unlocked');
+        } else {
+            lockLocation(locationId);
+            $(this).addClass('locked').attr('title', 'Unlock Location')
+                .find('i').removeClass('fa-lock-open').addClass('fa-lock');
+            toastr.success('Location locked - won\'t be deleted');
+        }
+    });
+
+    // Refresh/regenerate actions button
+    $(document).off('click.gm-refresh', '#rpg-gm-refresh-actions');
+    $(document).on('click.gm-refresh', '#rpg-gm-refresh-actions', async function(e) {
+        e.preventDefault();
+        const $btn = $(this);
+        const location = getCurrentLocation();
+
+        if (!location) {
+            toastr.warning('No location set');
+            return;
+        }
+
+        // Show loading state
+        $btn.prop('disabled', true).find('i').addClass('fa-spin');
+        toastr.info('Generating actions...');
+
+        try {
+            const result = await generateDynamicActions();
+
+            if (result.success && result.actions.length > 0) {
+                // Update location with new actions
+                location.actions = result.actions;
+                refreshActionsDisplay();
+
+                if (result.ambientNote) {
+                    toastr.success(result.ambientNote);
+                } else {
+                    toastr.success(`Generated ${result.actions.length} actions`);
+                }
+            } else {
+                // Fall back to preset actions
+                location.actions = getFallbackActions(location.type);
+                refreshActionsDisplay();
+                toastr.warning('Used fallback actions - check GM API settings');
+            }
+        } catch (error) {
+            console.error('[GM Mode UI] Action generation error:', error);
+            toastr.error('Failed to generate actions');
+        } finally {
+            $btn.prop('disabled', false).find('i').removeClass('fa-spin');
+        }
     });
 
     // Add action to queue

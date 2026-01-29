@@ -12293,6 +12293,29 @@ body:has(.rpg-panel[data-theme="light"]) .rpg-strip-widget {
     gap: 8px;
 }
 
+.rpg-gm-location-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+.rpg-gm-location-buttons .rpg-btn-icon {
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.rpg-gm-location-buttons .rpg-btn-icon:hover {
+    opacity: 1;
+}
+
+.rpg-gm-location-buttons .rpg-btn-icon.locked {
+    color: var(--rpg-highlight);
+    opacity: 1;
+}
+
+.rpg-gm-location-buttons .rpg-btn-icon.locked i {
+    color: var(--rpg-highlight);
+}
+
 .rpg-gm-location-icon {
     color: var(--rpg-highlight);
     font-size: 16px;
