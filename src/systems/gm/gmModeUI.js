@@ -301,8 +301,11 @@ export function setupGMModeEvents() {
         }
     });
 
-    // Change location button
-    $(document).off('click', '#rpg-gm-change-location').on('click', '#rpg-gm-change-location', function() {
+    // Change location button - use namespaced event like generate button
+    $(document).off('click.gm-change', '#rpg-gm-change-location');
+    $(document).on('click.gm-change', '#rpg-gm-change-location', function(e) {
+        e.preventDefault();
+        console.log('[GM Mode UI] Change location clicked');
         showLocationPicker();
     });
 

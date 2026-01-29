@@ -1,12 +1,14 @@
 /**
  * Unified Context Collector
- * Bridges UIE + RPG Companion data → Universe GM → Clean ambient output for Caleb
+ * RPG Companion + GM Mode → Universe GM → Clean ambient output for Caleb
  *
  * This is the "master context controller" that:
- * 1. Collects data from UIE (if available)
- * 2. Collects data from RPG Companion tracker
+ * 1. Collects data from RPG Companion tracker (stats, NPCs, info)
+ * 2. Collects data from GM Mode (locations, electronics, actions)
  * 3. Sends combined data to Universe GM for processing
  * 4. Outputs ONE clean <world_state> block with NO instructions
+ *
+ * Note: UIE integration is optional and kept as fallback only
  */
 
 import { extensionSettings } from '../../core/state.js';

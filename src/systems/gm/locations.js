@@ -8,6 +8,117 @@ import { saveSettings } from '../../core/persistence.js';
 
 // Location templates with predefined actions and electronics
 const LOCATION_TEMPLATES = {
+    // === INDOOR CHILD-FRIENDLY LOCATIONS ===
+    orphanage: {
+        type: 'orphanage',
+        namePatterns: ['St. Mary\'s Orphanage', 'Hope House', 'Sunny Days Home', 'Children\'s Haven', 'Little Stars Orphanage'],
+        descPatterns: [
+            'Old wooden floors creak underfoot. The smell of laundry and breakfast lingers.',
+            'Sunlight streams through tall windows. Distant sounds of other children playing.',
+            'A worn but clean building, full of echoes and memories.',
+            'The caretakers move quietly through the halls, keeping order.'
+        ],
+        electronics: ['hallway_speaker', 'office_computer', 'old_tv', 'wall_clock'],
+        defaultActions: [
+            { id: 'sleep', name: 'Sleep in your bed', time: 480, hp: 30, energy: 100, risk: 'none', flavor: 'Rest until morning (8 hours)' },
+            { id: 'nap', name: 'Take a nap', time: 60, energy: 40, risk: 'none', flavor: 'A quick rest' },
+            { id: 'play_room', name: 'Play in the common room', time: 30, energy: -10, risk: 'none', flavor: 'Toys and games await' },
+            { id: 'explore_halls', name: 'Explore the halls', time: 20, energy: -5, risk: 'low', flavor: 'What secrets does this old building hold?' },
+            { id: 'hide', name: 'Find a hiding spot', time: 15, energy: -3, risk: 'none', flavor: 'Sometimes you need to be alone' },
+            { id: 'sneak_kitchen', name: 'Sneak to the kitchen', time: 15, energy: -5, risk: 'medium', flavor: 'Maybe find a snack...' }
+        ]
+    },
+    bedroom: {
+        type: 'bedroom',
+        namePatterns: ['Your Bedroom', 'Shared Dormitory', 'Small Room', 'Sleeping Quarters', 'Your Corner'],
+        descPatterns: [
+            'A small bed with thin blankets. Not much, but it\'s yours.',
+            'The walls are bare except for a few drawings.',
+            'Moonlight filters through the window at night.',
+            'Your few possessions are tucked under the bed.'
+        ],
+        electronics: ['night_light', 'old_radio', 'wall_clock'],
+        defaultActions: [
+            { id: 'sleep', name: 'Go to sleep', time: 480, hp: 50, energy: 100, risk: 'none', flavor: 'Dream of better days (8 hours)' },
+            { id: 'nap', name: 'Rest a while', time: 60, energy: 40, risk: 'none', flavor: 'Close your eyes' },
+            { id: 'hide_bed', name: 'Hide under the bed', time: 10, energy: 5, risk: 'none', flavor: 'A safe place to think' },
+            { id: 'look_window', name: 'Look out the window', time: 10, energy: -2, risk: 'none', flavor: 'Watch the world outside' },
+            { id: 'check_belongings', name: 'Check your things', time: 5, energy: -1, risk: 'none', flavor: 'Make sure everything is there' }
+        ]
+    },
+    kitchen: {
+        type: 'kitchen',
+        namePatterns: ['The Kitchen', 'Dining Hall', 'Cafeteria', 'Mess Hall', 'Eating Area'],
+        descPatterns: [
+            'Pots and pans hang from hooks. The smell of cooking fills the air.',
+            'Long tables wait for mealtime. Benches worn smooth by countless meals.',
+            'Steam rises from the large stoves. A cook stirs something.',
+            'The clatter of dishes and murmur of voices at mealtimes.'
+        ],
+        electronics: ['refrigerator', 'microwave', 'kitchen_radio', 'wall_clock'],
+        defaultActions: [
+            { id: 'eat_meal', name: 'Eat a meal', time: 30, energy: 25, risk: 'none', flavor: 'Whatever\'s being served today' },
+            { id: 'grab_snack', name: 'Grab a snack', time: 10, energy: 10, risk: 'low', flavor: 'Quick bite between meals' },
+            { id: 'help_cook', name: 'Help with cooking', time: 45, energy: -15, risk: 'none', flavor: 'Learn something useful' },
+            { id: 'wash_dishes', name: 'Wash dishes', time: 30, energy: -10, risk: 'none', flavor: 'Chores build character (they say)' },
+            { id: 'sneak_food', name: 'Sneak extra food', time: 10, energy: -5, risk: 'medium', flavor: 'You\'re always hungry...' }
+        ]
+    },
+    playground: {
+        type: 'playground',
+        namePatterns: ['The Playground', 'Back Yard', 'Play Area', 'Outdoor Space', 'The Courtyard'],
+        descPatterns: [
+            'Swings creak in the breeze. A rusty slide catches the sun.',
+            'Patches of grass between worn dirt paths. Kids\' territory.',
+            'A basketball hoop with no net. A sandbox with old toys.',
+            'Freedom within the fence. The best part of the day.'
+        ],
+        electronics: ['outdoor_speaker', 'security_camera'],
+        defaultActions: [
+            { id: 'play_swings', name: 'Play on the swings', time: 20, energy: -10, risk: 'none', flavor: 'Feel like flying' },
+            { id: 'explore_yard', name: 'Explore the yard', time: 25, energy: -8, risk: 'low', flavor: 'Look for interesting things' },
+            { id: 'play_others', name: 'Play with others', time: 30, energy: -15, risk: 'low', flavor: 'Make friends... or enemies' },
+            { id: 'sit_alone', name: 'Sit alone', time: 15, energy: 5, risk: 'none', flavor: 'Watch from a distance' },
+            { id: 'dig_sandbox', name: 'Dig in the sandbox', time: 20, energy: -5, risk: 'none', flavor: 'Maybe find buried treasure' }
+        ]
+    },
+    classroom: {
+        type: 'classroom',
+        namePatterns: ['The Classroom', 'Study Room', 'Learning Hall', 'School Room', 'Lesson Room'],
+        descPatterns: [
+            'Wooden desks in rows. A chalkboard covered in lessons.',
+            'Books and papers scattered about. The smell of chalk dust.',
+            'A stern teacher\'s desk at the front. Eyes always watching.',
+            'Maps and charts on the walls. Windows you daydream through.'
+        ],
+        electronics: ['classroom_projector', 'computer_corner', 'wall_clock', 'intercom'],
+        defaultActions: [
+            { id: 'pay_attention', name: 'Pay attention to lesson', time: 45, energy: -10, risk: 'none', flavor: 'Learn something new' },
+            { id: 'daydream', name: 'Daydream', time: 30, energy: 5, risk: 'low', flavor: 'Let your mind wander' },
+            { id: 'read_book', name: 'Read a book', time: 30, energy: -5, risk: 'none', flavor: 'Escape into stories' },
+            { id: 'talk_classmate', name: 'Whisper to classmate', time: 10, energy: -3, risk: 'medium', flavor: 'Pass a note maybe?' },
+            { id: 'ask_question', name: 'Ask a question', time: 5, energy: -5, risk: 'low', flavor: 'Be brave' }
+        ]
+    },
+    bathroom: {
+        type: 'bathroom',
+        namePatterns: ['The Bathroom', 'Washroom', 'Lavatory', 'Restroom'],
+        descPatterns: [
+            'Echoing tiles and dripping faucets. Privacy is rare here.',
+            'Mirrors line the wall above the sinks. Cold water only.',
+            'The pipes groan and gurgle. Best not to linger.',
+            'Steam from the showers fogs the windows.'
+        ],
+        electronics: ['bathroom_vent', 'electric_hand_dryer'],
+        defaultActions: [
+            { id: 'wash_up', name: 'Wash up', time: 10, energy: 5, risk: 'none', flavor: 'Clean face and hands' },
+            { id: 'take_bath', name: 'Take a bath', time: 30, energy: 15, risk: 'none', flavor: 'Warm water helps' },
+            { id: 'hide_stall', name: 'Hide in a stall', time: 15, energy: 5, risk: 'none', flavor: 'A moment of peace' },
+            { id: 'cry', name: 'Have a good cry', time: 20, energy: -10, hp: -5, risk: 'none', flavor: 'Let it out' }
+        ]
+    },
+
+    // === OUTDOOR/CITY LOCATIONS ===
     street: {
         type: 'street',
         namePatterns: ['Main Street', 'Back Alley', 'Shopping District', 'Residential Road', 'Market Square'],
@@ -113,6 +224,23 @@ const LOCATION_TEMPLATES = {
 
 // Electronics info for Caleb manifestation
 const ELECTRONICS_INFO = {
+    // Orphanage/Indoor locations
+    hallway_speaker: { name: 'Hallway Speaker', strength: 'medium', desc: 'Announcements crackle with extra words' },
+    office_computer: { name: 'Office Computer', strength: 'strong', desc: 'Screen flickers when you pass' },
+    old_tv: { name: 'Old TV', strength: 'strong', desc: 'Channels change by themselves' },
+    wall_clock: { name: 'Wall Clock', strength: 'weak', desc: 'Time seems to pause sometimes' },
+    night_light: { name: 'Night Light', strength: 'weak', desc: 'Glows brighter when you\'re scared' },
+    old_radio: { name: 'Old Radio', strength: 'medium', desc: 'Static sounds like whispers' },
+    refrigerator: { name: 'Refrigerator', strength: 'weak', desc: 'Hums a familiar tune' },
+    kitchen_radio: { name: 'Kitchen Radio', strength: 'medium', desc: 'Songs play at just the right moment' },
+    outdoor_speaker: { name: 'Outdoor Speaker', strength: 'weak', desc: 'Bell rings seem meaningful' },
+    classroom_projector: { name: 'Projector', strength: 'medium', desc: 'Images glitch into patterns' },
+    computer_corner: { name: 'Computer Corner', strength: 'strong', desc: 'Cursors move on their own' },
+    intercom: { name: 'Intercom', strength: 'medium', desc: 'Extra static between calls' },
+    bathroom_vent: { name: 'Bathroom Vent', strength: 'weak', desc: 'Whirring sounds like words' },
+    electric_hand_dryer: { name: 'Hand Dryer', strength: 'weak', desc: 'Activates unexpectedly' },
+
+    // City/outdoor locations
     traffic_light: { name: 'Traffic Light', strength: 'weak', desc: 'Flickers with meaning' },
     atm_screen: { name: 'ATM Screen', strength: 'medium', desc: 'Numbers dance briefly' },
     store_display: { name: 'Store Display', strength: 'medium', desc: 'Images shift unexpectedly' },
