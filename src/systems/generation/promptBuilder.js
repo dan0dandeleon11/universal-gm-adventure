@@ -416,17 +416,10 @@ export function generateTrackerInstructions(includeHtmlPrompt = true, includeCon
         }
 
         // Add dice roll context if there was one (independent of attributes)
+        // Data-only: just report the roll, let the AI infer from context
         if (extensionSettings.lastDiceRoll) {
             const roll = extensionSettings.lastDiceRoll;
-            const showRPGAttributes = trackerConfig?.userStats?.showRPGAttributes !== false;
-            const alwaysSendAttributes = trackerConfig?.userStats?.alwaysSendAttributes;
-            const hasAttributes = includeAttributes && (alwaysSendAttributes && showRPGAttributes);
-
-            if (hasAttributes) {
-                instructions += `${userName} rolled ${roll.total} on the last ${roll.formula} roll. Based on their attributes, decide whether they succeeded or failed the action they attempted.\n\n`;
-            } else {
-                instructions += `${userName} rolled ${roll.total} on the last ${roll.formula} roll. Decide whether they succeeded or failed the action they attempted.\n\n`;
-            }
+            instructions += `${userName} rolled ${roll.total} on the last ${roll.formula} roll.\n\n`;
         } else if (includeAttributes && trackerConfig?.userStats?.alwaysSendAttributes && trackerConfig?.userStats?.showRPGAttributes !== false) {
             instructions += `\n`;
         }
@@ -1083,14 +1076,10 @@ export function generateContextualSummary() {
     }
 
     // Add dice roll context if there was one (independent of attributes)
+    // Data-only: just report the roll, let the AI infer from context
     if (extensionSettings.lastDiceRoll) {
         const roll = extensionSettings.lastDiceRoll;
-
-        if (shouldSendAttributes) {
-            summary += `${userName} rolled ${roll.total} on the last ${roll.formula} roll. Based on their attributes, decide whether they succeeded or failed the action they attempted.\n\n`;
-        } else {
-            summary += `${userName} rolled ${roll.total} on the last ${roll.formula} roll. Decide whether they succeeded or failed the action they attempted.\n\n`;
-        }
+        summary += `${userName} rolled ${roll.total} on the last ${roll.formula} roll.\n\n`;
     } else if (shouldSendAttributes) {
         summary += `\n`;
     }
