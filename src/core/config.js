@@ -6,7 +6,7 @@
 // Type imports
 /** @typedef {import('../types/inventory.js').InventoryV2} InventoryV2 */
 
-export const extensionName = 'third-party/rpg-companion-sillytavern';
+export const extensionName = 'third-party/universal-gm-adventure';
 
 /**
  * Dynamically determine extension path based on current location
