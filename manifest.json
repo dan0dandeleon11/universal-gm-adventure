@@ -1,0 +1,12 @@
+{
+    "display_name": "RPG Companion + GM Mode",
+    "loading_order": 100,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "Marinara (original), Lei (GM Mode fork)",
+    "version": "3.7.0-gm.1",
+    "homePage": "https://github.com/SpicyMarinara/rpg-companion-sillytavern",
+    "description": "RPG Companion with Universe GM integration - ambient context injection that works WITH your character presets, not against them."
+}
