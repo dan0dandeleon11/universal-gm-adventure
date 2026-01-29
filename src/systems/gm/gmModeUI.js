@@ -472,8 +472,15 @@ function refreshActionsDisplay() {
  * Show location picker modal
  */
 function showLocationPicker() {
+    console.log('[GM Mode UI] showLocationPicker called');
+
+    // Remove any existing picker first
+    $('#rpg-gm-location-picker').remove();
+
     const locationTypes = getLocationTypes();
     const savedLocations = getAllLocations();
+    console.log('[GM Mode UI] Location types:', locationTypes);
+    console.log('[GM Mode UI] Saved locations:', savedLocations.length);
 
     const modalHtml = `
     <div id="rpg-gm-location-picker" class="rpg-modal-overlay">

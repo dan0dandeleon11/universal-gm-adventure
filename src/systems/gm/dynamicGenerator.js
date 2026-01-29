@@ -24,10 +24,18 @@ CONTEXT:
 Generate 4-6 context-appropriate actions the player can take. Each action should:
 - Make sense for the current location and situation
 - Have a brief, quirky flavor text (1 sentence max)
-- Include time cost, energy cost, and risk level
+- Include time (in minutes), and optionally energy/money/hp changes
+- Include risk level (none, low, medium, or high)
 - Occasionally include discovery of new locations (mark with discovers: "location_type")
 
 Keep flavor text punchy and slightly playful - not over-the-top funny.
+
+IMPORTANT: Only use these exact stat names:
+- "time": minutes the action takes (required, positive number)
+- "energy": energy change (negative = costs energy, positive = restores)
+- "money": money change (negative = costs money, positive = gains)
+- "hp": health change (negative = takes damage, positive = heals)
+- "risk": must be exactly "none", "low", "medium", or "high"
 
 Respond in this exact JSON format:
 {
@@ -38,7 +46,7 @@ Respond in this exact JSON format:
       "flavor": "Brief quirky description.",
       "time": 15,
       "energy": -5,
-      "risk": "none|low|medium|high",
+      "risk": "none",
       "discovers": null
     }
   ],
@@ -240,12 +248,23 @@ export async function generateDynamicActions() {
             return { success: false, error: 'Failed to parse action response' };
         }
 
-        // Add IDs if missing
+        // Sanitize and normalize actions
         if (parsed.actions) {
-            parsed.actions = parsed.actions.map((action, idx) => ({
-                ...action,
-                id: action.id || `dynamic_${Date.now()}_${idx}`
-            }));
+            parsed.actions = parsed.actions.map((action, idx) => {
+                // Normalize stat names (Kimi might use different names)
+                const normalized = {
+                    id: action.id || `dynamic_${Date.now()}_${idx}`,
+                    name: action.name || 'Unknown Action',
+                    flavor: action.flavor || action.description || '',
+                    time: parseInt(action.time) || parseInt(action.duration) || parseInt(action.minutes) || 10,
+                    energy: parseInt(action.energy) || parseInt(action.stamina) || parseInt(action.fatigue) || 0,
+                    money: parseInt(action.money) || parseInt(action.cost) || parseInt(action.gold) || 0,
+                    hp: parseInt(action.hp) || parseInt(action.health) || parseInt(action.damage) || 0,
+                    risk: normalizeRisk(action.risk || action.danger || 'none'),
+                    discovers: action.discovers || action.unlocks || action.reveals || null
+                };
+                return normalized;
+            });
         }
 
         return {
@@ -345,6 +364,19 @@ export async function executeAction(action) {
 // ============================================
 // HELPERS
 // ============================================
+
+/**
+ * Normalize risk level to expected values
+ */
+function normalizeRisk(risk) {
+    if (!risk) return 'none';
+    const r = String(risk).toLowerCase().trim();
+    if (r === 'none' || r === 'safe' || r === 'no') return 'none';
+    if (r === 'low' || r === 'minor' || r === 'slight') return 'low';
+    if (r === 'medium' || r === 'moderate' || r === 'mid') return 'medium';
+    if (r === 'high' || r === 'dangerous' || r === 'risky' || r === 'extreme') return 'high';
+    return 'none';
+}
 
 /**
  * Parse JSON from GM response (handles markdown code blocks)
