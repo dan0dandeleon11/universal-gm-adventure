@@ -1152,6 +1152,50 @@
                     <div id="rpg-gm-template-preview-output"
                         style="margin-top: 12px; padding: 12px; background: var(--SmartThemeBlurTintColor); border-radius: 4px; font-family: monospace; font-size: 12px; white-space: pre-wrap; display: none;"></div>
                 </div>
+
+                <!-- Action Generation Prompt Editor -->
+                <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--rpg-border);">
+                    <h5 style="margin-bottom: 12px;"><i class="fa-solid fa-wand-magic-sparkles"></i> Action Generation Prompt</h5>
+                    <small style="display: block; margin-bottom: 12px; color: #888;">
+                        Customize how the GM generates actions. Placeholders: <code>{{LOCATION}}</code>,
+                        <code>{{TIME_OF_DAY}}</code>, <code>{{PLAYER_STATS}}</code>, <code>{{RECENT_EVENTS}}</code>,
+                        <code>{{AVAILABLE_STATS}}</code>.
+                    </small>
+
+                    <textarea id="rpg-gm-action-prompt" class="rpg-prompt-textarea" rows="10"
+                        placeholder="Leave empty for default prompt"></textarea>
+
+                    <h6 style="margin-top: 12px; margin-bottom: 8px;">Available Stats (for AI reference)</h6>
+                    <small style="display: block; margin-bottom: 8px; color: #888;">
+                        Define which stats the AI can use when generating actions. One stat per line.
+                    </small>
+                    <textarea id="rpg-gm-available-stats" class="rpg-prompt-textarea" rows="6"
+                        placeholder="- &quot;time&quot;: minutes (required)&#10;- &quot;energy&quot;: energy change&#10;- &quot;money&quot;: money change&#10;- &quot;hp&quot;: health change"></textarea>
+
+                    <div style="margin-top: 8px; display: flex; gap: 8px;">
+                        <button id="rpg-gm-action-prompt-reset" class="menu_button" type="button">
+                            <i class="fa-solid fa-rotate-left"></i> Reset to Default
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Location Generation Prompt Editor -->
+                <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--rpg-border);">
+                    <h5 style="margin-bottom: 12px;"><i class="fa-solid fa-map"></i> Location Generation Prompt</h5>
+                    <small style="display: block; margin-bottom: 12px; color: #888;">
+                        Customize how the GM generates discovered locations. Placeholders: <code>{{LOCATION_TYPE}}</code>,
+                        <code>{{CURRENT_LOCATION}}</code>, <code>{{DISCOVERY_ACTION}}</code>.
+                    </small>
+
+                    <textarea id="rpg-gm-location-prompt" class="rpg-prompt-textarea" rows="10"
+                        placeholder="Leave empty for default prompt"></textarea>
+
+                    <div style="margin-top: 8px; display: flex; gap: 8px;">
+                        <button id="rpg-gm-location-prompt-reset" class="menu_button" type="button">
+                            <i class="fa-solid fa-rotate-left"></i> Reset to Default
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

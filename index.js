@@ -218,6 +218,14 @@ import {
     setupGMModeEvents,
     refreshGMModeDisplay
 } from './src/systems/gm/gmModeUI.js';
+import {
+    getActionPrompt,
+    getLocationPrompt,
+    getAvailableStats,
+    saveCustomPrompts,
+    resetPromptsToDefault,
+    getDefaultPrompts
+} from './src/systems/gm/dynamicGenerator.js';
 
 // Old state variable declarations removed - now imported from core modules
 // (extensionSettings, lastGeneratedData, committedTrackerData, etc. are now in src/core/state.js)
@@ -1661,6 +1669,59 @@ function initGMModeUI() {
         saveSettings();
         toastr.info('Template reset to default');
         $('#rpg-gm-template-preview-output').hide();
+    });
+
+    // ============================================
+    // ACTION/LOCATION GENERATION PROMPT EDITORS
+    // ============================================
+
+    // Load current prompts into textareas
+    $('#rpg-gm-action-prompt').val(
+        extensionSettings.gmMode?.actionPrompt || ''
+    ).on('change', function() {
+        const val = $(this).val().trim();
+        saveCustomPrompts(val || null, null, null);
+        toastr.success('Action prompt saved');
+    });
+
+    $('#rpg-gm-available-stats').val(
+        extensionSettings.gmMode?.availableStats || ''
+    ).on('change', function() {
+        const val = $(this).val().trim();
+        saveCustomPrompts(null, null, val || null);
+        toastr.success('Available stats saved');
+    });
+
+    $('#rpg-gm-location-prompt').val(
+        extensionSettings.gmMode?.locationPrompt || ''
+    ).on('change', function() {
+        const val = $(this).val().trim();
+        saveCustomPrompts(null, val || null, null);
+        toastr.success('Location prompt saved');
+    });
+
+    // Reset action prompt to default
+    $('#rpg-gm-action-prompt-reset').on('click', function() {
+        const defaults = getDefaultPrompts();
+        $('#rpg-gm-action-prompt').val('');
+        $('#rpg-gm-available-stats').val('');
+        if (extensionSettings.gmMode) {
+            delete extensionSettings.gmMode.actionPrompt;
+            delete extensionSettings.gmMode.availableStats;
+        }
+        saveSettings();
+        toastr.info('Action prompt reset to default');
+    });
+
+    // Reset location prompt to default
+    $('#rpg-gm-location-prompt-reset').on('click', function() {
+        const defaults = getDefaultPrompts();
+        $('#rpg-gm-location-prompt').val('');
+        if (extensionSettings.gmMode) {
+            delete extensionSettings.gmMode.locationPrompt;
+        }
+        saveSettings();
+        toastr.info('Location prompt reset to default');
     });
 
     // Show GM Mode section based on settings

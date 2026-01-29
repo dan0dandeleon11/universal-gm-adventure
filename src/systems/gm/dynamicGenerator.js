@@ -10,32 +10,26 @@ import { callGMAPI } from './gmEngine.js';
 import { getCurrentLocation, getTimeOfDay, saveLocation, setCurrentLocation } from './locations.js';
 
 // ============================================
-// GENERATION PROMPTS
+// GENERATION PROMPTS (defaults - user can override in settings)
 // ============================================
 
-const ACTION_GENERATION_PROMPT = `You are a game master generating actions for a player.
+const DEFAULT_ACTION_PROMPT = `You are a game master generating actions for a player.
 
 CONTEXT:
-{{LOCATION}}
-{{TIME_OF_DAY}}
-{{PLAYER_STATS}}
-{{RECENT_EVENTS}}
+Location: {{LOCATION}}
+Time: {{TIME_OF_DAY}}
+Player: {{PLAYER_STATS}}
+Recent: {{RECENT_EVENTS}}
 
 Generate 4-6 context-appropriate actions the player can take. Each action should:
 - Make sense for the current location and situation
-- Have a brief, quirky flavor text (1 sentence max)
-- Include time (in minutes), and optionally energy/money/hp changes
+- Have a brief, quirky flavor text (1 sentence max, slightly playful but not over-the-top)
+- Include stat effects using ONLY the exact stat names listed below
 - Include risk level (none, low, medium, or high)
 - Occasionally include discovery of new locations (mark with discovers: "location_type")
 
-Keep flavor text punchy and slightly playful - not over-the-top funny.
-
-IMPORTANT: Only use these exact stat names:
-- "time": minutes the action takes (required, positive number)
-- "energy": energy change (negative = costs energy, positive = restores)
-- "money": money change (negative = costs money, positive = gains)
-- "hp": health change (negative = takes damage, positive = heals)
-- "risk": must be exactly "none", "low", "medium", or "high"
+CRITICAL - ONLY USE THESE EXACT STAT NAMES:
+{{AVAILABLE_STATS}}
 
 Respond in this exact JSON format:
 {
@@ -53,7 +47,7 @@ Respond in this exact JSON format:
   "ambient_note": "One sentence about something interesting in the environment."
 }`;
 
-const LOCATION_GENERATION_PROMPT = `You are a game master creating a new location.
+const DEFAULT_LOCATION_PROMPT = `You are a game master creating a new location.
 
 The player is discovering: {{LOCATION_TYPE}}
 From: {{CURRENT_LOCATION}}
@@ -75,6 +69,70 @@ Respond in this exact JSON format:
   "mood": "one word mood",
   "ambient_detail": "One quirky environmental detail."
 }`;
+
+// Default available stats for actions
+const DEFAULT_AVAILABLE_STATS = `- "time": minutes the action takes (required, positive number like 10, 15, 30, 60)
+- "energy": energy change (negative = costs energy like -5, positive = restores like +20)
+- "money": money change (negative = costs money like -10, positive = gains like +5)
+- "hp": health change (negative = damage like -10, positive = heals like +15)
+- "risk": must be exactly "none", "low", "medium", or "high"`;
+
+/**
+ * Get action generation prompt (user-editable)
+ */
+export function getActionPrompt() {
+    const gmSettings = extensionSettings.gmMode || {};
+    return gmSettings.actionPrompt || DEFAULT_ACTION_PROMPT;
+}
+
+/**
+ * Get location generation prompt (user-editable)
+ */
+export function getLocationPrompt() {
+    const gmSettings = extensionSettings.gmMode || {};
+    return gmSettings.locationPrompt || DEFAULT_LOCATION_PROMPT;
+}
+
+/**
+ * Get available stats definition (user-editable)
+ */
+export function getAvailableStats() {
+    const gmSettings = extensionSettings.gmMode || {};
+    return gmSettings.availableStats || DEFAULT_AVAILABLE_STATS;
+}
+
+/**
+ * Save custom prompts
+ */
+export function saveCustomPrompts(actionPrompt, locationPrompt, availableStats) {
+    if (!extensionSettings.gmMode) extensionSettings.gmMode = {};
+    if (actionPrompt) extensionSettings.gmMode.actionPrompt = actionPrompt;
+    if (locationPrompt) extensionSettings.gmMode.locationPrompt = locationPrompt;
+    if (availableStats) extensionSettings.gmMode.availableStats = availableStats;
+    saveSettings();
+}
+
+/**
+ * Reset prompts to defaults
+ */
+export function resetPromptsToDefault() {
+    if (!extensionSettings.gmMode) extensionSettings.gmMode = {};
+    delete extensionSettings.gmMode.actionPrompt;
+    delete extensionSettings.gmMode.locationPrompt;
+    delete extensionSettings.gmMode.availableStats;
+    saveSettings();
+}
+
+/**
+ * Get default prompts (for reset/reference)
+ */
+export function getDefaultPrompts() {
+    return {
+        actionPrompt: DEFAULT_ACTION_PROMPT,
+        locationPrompt: DEFAULT_LOCATION_PROMPT,
+        availableStats: DEFAULT_AVAILABLE_STATS
+    };
+}
 
 // ============================================
 // USER-EDITABLE PRESETS (stored in settings)
@@ -227,12 +285,17 @@ export async function generateDynamicActions() {
     let recentEvents = 'None noted';
     // TODO: Could pull from recent chat messages
 
-    // Build the prompt
-    const prompt = ACTION_GENERATION_PROMPT
+    // Get user-editable prompt and stats
+    const actionPrompt = getActionPrompt();
+    const availableStats = getAvailableStats();
+
+    // Build the prompt with all replacements
+    const prompt = actionPrompt
         .replace('{{LOCATION}}', locationContext)
         .replace('{{TIME_OF_DAY}}', timeOfDay || 'day')
         .replace('{{PLAYER_STATS}}', statsContext)
-        .replace('{{RECENT_EVENTS}}', recentEvents);
+        .replace('{{RECENT_EVENTS}}', recentEvents)
+        .replace('{{AVAILABLE_STATS}}', availableStats);
 
     try {
         const result = await callGMAPI(prompt);
@@ -285,8 +348,11 @@ export async function generateDynamicActions() {
 export async function generateDiscoveredLocation(locationType, discoveryAction = null) {
     const currentLocation = getCurrentLocation();
 
+    // Get user-editable prompt
+    const locationPrompt = getLocationPrompt();
+
     // Build the prompt
-    const prompt = LOCATION_GENERATION_PROMPT
+    const prompt = locationPrompt
         .replace('{{LOCATION_TYPE}}', locationType)
         .replace('{{CURRENT_LOCATION}}', currentLocation?.name || 'Unknown')
         .replace('{{DISCOVERY_ACTION}}', discoveryAction || 'exploration');
