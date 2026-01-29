@@ -196,11 +196,14 @@ function renderActionsList(actions) {
         if (action.money) statChanges.push(`$${formatStatChange(action.money)}`);
         if (action.hp) statChanges.push(`HP:${formatStatChange(action.hp)}`);
 
+        // Safely encode action data to avoid HTML attribute issues
+        const safeActionData = btoa(encodeURIComponent(JSON.stringify(action)));
+
         return `
         <div class="rpg-gm-action-item ${inQueue ? 'rpg-gm-action-queued' : ''}" data-action-id="${action.id}">
             <div class="rpg-gm-action-main">
                 <button class="rpg-gm-action-add ${inQueue ? 'in-queue' : ''}"
-                        data-action='${JSON.stringify(action)}'
+                        data-action-encoded="${safeActionData}"
                         ${inQueue ? 'disabled' : ''}>
                     <i class="fa-solid ${inQueue ? 'fa-check' : 'fa-plus'}"></i>
                 </button>
@@ -412,9 +415,18 @@ export function setupGMModeEvents() {
     $(document).off('click', '.rpg-gm-action-add').on('click', '.rpg-gm-action-add', function() {
         if ($(this).hasClass('in-queue')) return;
 
-        const actionData = $(this).data('action');
-        const location = getCurrentLocation();
+        // Decode the safely encoded action data
+        const encoded = $(this).attr('data-action-encoded');
+        let actionData;
+        try {
+            actionData = JSON.parse(decodeURIComponent(atob(encoded)));
+        } catch (e) {
+            console.error('[GM Mode UI] Failed to parse action data:', e);
+            toastr.error('Failed to add action');
+            return;
+        }
 
+        const location = getCurrentLocation();
         const result = addToQueue(actionData, location);
 
         if (result.success) {
