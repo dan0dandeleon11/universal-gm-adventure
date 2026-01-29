@@ -190,6 +190,28 @@ import {
     previewInjection,
     getDefaultTemplates
 } from './src/systems/gm/gmInjection.js';
+import {
+    generateLocation,
+    saveLocation,
+    setCurrentLocation,
+    getCurrentLocation,
+    getLocationTypes,
+    formatLocationForGM
+} from './src/systems/gm/locations.js';
+import {
+    addToQueue,
+    removeFromQueue,
+    clearQueue,
+    getQueue,
+    getQueueSummary,
+    formatQueueForGM,
+    subscribeToQueue
+} from './src/systems/gm/actionQueue.js';
+import {
+    createGMModeTabHTML,
+    setupGMModeEvents,
+    refreshGMModeDisplay
+} from './src/systems/gm/gmModeUI.js';
 
 // Old state variable declarations removed - now imported from core modules
 // (extensionSettings, lastGeneratedData, committedTrackerData, etc. are now in src/core/state.js)
@@ -1272,6 +1294,85 @@ async function initUI() {
  */
 function initGMModeUI() {
     const gmSettings = extensionSettings.gmMode || {};
+
+    // === Panel Tab Switching ===
+    $('.rpg-panel-tab').on('click', function() {
+        const tabId = $(this).data('tab');
+
+        // Update tab button states
+        $('.rpg-panel-tab').removeClass('active');
+        $(this).addClass('active');
+
+        // Show/hide tab content
+        $('.rpg-tab-content').removeClass('active');
+        $(`#rpg-tab-${tabId}`).addClass('active');
+
+        // Refresh GM Mode display when switching to it
+        if (tabId === 'gm-mode') {
+            $('#rpg-gm-tab-container').html(createGMModeTabHTML());
+            setupGMModeEvents();
+        }
+    });
+
+    // Initialize GM Mode tab content and events
+    setupGMModeEvents();
+
+    // === GM Send Turn Event (from GM Mode tab) ===
+    $(document).on('rpg-gm-send-turn', async function(e) {
+        const { queue, summary } = e.detail || e.originalEvent?.detail || {};
+        if (!queue || queue.length === 0) {
+            toastr.warning('No actions in queue');
+            return;
+        }
+
+        const $btn = $('#rpg-gm-send-turn');
+        const originalHtml = $btn.html();
+        $btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Processing...').prop('disabled', true);
+
+        try {
+            // Build context from queue
+            const queueContext = formatQueueForGM();
+            const locationContext = formatLocationForGM(getCurrentLocation());
+
+            // Roll for the turn
+            const roll = rollForGM(1, 20, 0, 'Turn resolution');
+
+            // Get any user message
+            const userMessage = $('#send_textarea').val() || '';
+
+            // Process GM turn with queue context
+            const result = await processGMTurn(userMessage, {
+                queueContext,
+                locationContext,
+                roll
+            });
+
+            if (result.success) {
+                // Show narration preview
+                $('#rpg-gm-narration-content-tab').text(result.narration);
+                $('#rpg-gm-narration-preview').show();
+
+                // Clear the queue
+                clearQueue();
+                refreshGMModeDisplay();
+
+                toastr.success('GM ruling ready! Send your message to continue.');
+            } else {
+                toastr.error(result.error || 'Failed to process GM turn');
+            }
+        } catch (error) {
+            console.error('[RPG Companion GM] Error processing turn:', error);
+            toastr.error('Error: ' + error.message);
+        } finally {
+            $btn.html(originalHtml).prop('disabled', false);
+        }
+    });
+
+    // Clear narration in GM Mode tab
+    $(document).on('click', '#rpg-gm-clear-narration-tab', function() {
+        clearGMInjection();
+        $('#rpg-gm-narration-preview').hide();
+    });
 
     // Show GM Mode section if setting exists (hidden by default)
     if (gmSettings.enabled) {

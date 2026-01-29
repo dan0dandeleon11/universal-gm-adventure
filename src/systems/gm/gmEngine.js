@@ -232,17 +232,27 @@ export async function callGMAPI(playerMessage = '', diceRoll = null) {
 
 /**
  * Process a GM turn:
- * 1. Get pending dice roll (if any)
- * 2. Call GM API
- * 3. Inject result into context
- * 4. Return result for UI display
+ * 1. Get pending dice roll (if any) or use provided roll
+ * 2. Build context from queue, location, and tracker
+ * 3. Call GM API
+ * 4. Inject result into context
+ * 5. Return result for UI display
+ *
+ * @param {string} playerMessage - Optional player message
+ * @param {Object} options - Additional context options
+ * @param {string} options.queueContext - Formatted queue for GM
+ * @param {string} options.locationContext - Formatted location for GM
+ * @param {Object} options.roll - Optional pre-rolled dice result
  */
-export async function processGMTurn(playerMessage = '') {
-    // Get and consume any pending dice roll
-    const diceRoll = consumePendingGMRoll();
+export async function processGMTurn(playerMessage = '', options = {}) {
+    // Get and consume any pending dice roll, or use provided roll
+    const diceRoll = options.roll || consumePendingGMRoll();
+
+    // Build enhanced context with queue and location
+    const enhancedMessage = buildEnhancedPlayerMessage(playerMessage, options);
 
     // Call GM API
-    const result = await callGMAPI(playerMessage, diceRoll);
+    const result = await callGMAPI(enhancedMessage, diceRoll);
 
     if (!result.success) {
         return {
@@ -263,8 +273,33 @@ export async function processGMTurn(playerMessage = '') {
         narration: result.narration,
         diceRoll,
         parsedSections,
-        context: result.context
+        context: result.context,
+        queueProcessed: !!options.queueContext
     };
+}
+
+/**
+ * Build enhanced player message with queue and location context
+ */
+function buildEnhancedPlayerMessage(playerMessage, options) {
+    const parts = [];
+
+    // Add location context first
+    if (options.locationContext) {
+        parts.push(options.locationContext);
+    }
+
+    // Add queue context
+    if (options.queueContext) {
+        parts.push(options.queueContext);
+    }
+
+    // Add player message if any
+    if (playerMessage && playerMessage.trim()) {
+        parts.push(`PLAYER MESSAGE:\n${playerMessage.trim()}`);
+    }
+
+    return parts.join('\n\n') || '(Player takes their turn)';
 }
 
 /**

@@ -54,7 +54,18 @@
             </h3>
         </div>
 
-        <div id="rpg-panel-content">
+        <!-- Panel Tabs (Tracker / GM Mode) -->
+        <div id="rpg-panel-tabs" class="rpg-panel-tabs">
+            <button class="rpg-panel-tab active" data-tab="tracker">
+                <i class="fa-solid fa-chart-bar"></i> Tracker
+            </button>
+            <button class="rpg-panel-tab" data-tab="gm-mode">
+                <i class="fa-solid fa-theater-masks"></i> GM Mode
+            </button>
+        </div>
+
+        <!-- Tracker Tab Content -->
+        <div id="rpg-tab-tracker" class="rpg-tab-content active">
             <!-- Dice Roll Display -->
             <div id="rpg-dice-display" class="rpg-dice-display">
                 <i class="fa-solid fa-dice"></i>
@@ -280,6 +291,85 @@
                 </button>
             </div>
         </div>
+        <!-- End Tracker Tab Content -->
+
+        <!-- GM Mode Tab Content -->
+        <div id="rpg-tab-gm-mode" class="rpg-tab-content">
+            <div id="rpg-gm-tab-container" class="rpg-gm-tab-container">
+                <!-- Content populated by gmModeUI.js -->
+                <div class="rpg-gm-tab-content">
+                    <!-- Location Section (will be rendered dynamically) -->
+                    <div class="rpg-gm-location-section">
+                        <div class="rpg-gm-no-location">
+                            <div class="rpg-gm-no-location-icon">
+                                <i class="fa-solid fa-map"></i>
+                            </div>
+                            <div class="rpg-gm-no-location-text">No location set</div>
+                            <div class="rpg-gm-no-location-hint">Generate a location to see available actions</div>
+
+                            <div class="rpg-gm-location-generator">
+                                <select id="rpg-gm-location-type" class="rpg-select">
+                                    <option value="street">Street</option>
+                                    <option value="cafe">Cafe</option>
+                                    <option value="convenience_store">Convenience Store</option>
+                                    <option value="park">Park</option>
+                                    <option value="train_station">Train Station</option>
+                                    <option value="apartment">Apartment</option>
+                                </select>
+                                <button id="rpg-gm-generate-location" class="rpg-btn-primary">
+                                    <i class="fa-solid fa-dice"></i> Generate
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Queue Section -->
+                    <div class="rpg-gm-queue-section">
+                        <div class="rpg-gm-section-header">
+                            <span><i class="fa-solid fa-list-check"></i> Action Queue</span>
+                            <button id="rpg-gm-clear-queue" class="rpg-btn-icon rpg-gm-clear-queue" title="Clear Queue">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+
+                        <div id="rpg-gm-queue-list" class="rpg-gm-queue-list">
+                            <div class="rpg-gm-queue-empty">
+                                <i class="fa-solid fa-inbox"></i>
+                                <span>Click [+] to add actions to queue</span>
+                            </div>
+                        </div>
+
+                        <div id="rpg-gm-queue-summary" class="rpg-gm-queue-summary"></div>
+
+                        <div class="rpg-gm-queue-actions">
+                            <button id="rpg-gm-send-turn" class="rpg-btn-primary rpg-gm-send-btn">
+                                <i class="fa-solid fa-dice-d20"></i> Roll & Send Turn
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- GM Narration Preview -->
+                    <div id="rpg-gm-narration-preview" class="rpg-gm-narration-preview" style="display: none;">
+                        <div class="rpg-gm-narration-header">
+                            <i class="fa-solid fa-scroll"></i>
+                            <span>Latest GM Ruling</span>
+                            <button id="rpg-gm-clear-narration-tab" class="rpg-btn-icon" title="Clear">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="rpg-gm-narration-content-tab" class="rpg-gm-narration-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GM Mode Settings Button -->
+            <div class="rpg-gm-settings-row">
+                <button id="rpg-gm-open-settings" class="rpg-btn-settings">
+                    <i class="fa-solid fa-gear"></i> GM Mode Settings
+                </button>
+            </div>
+        </div>
+        <!-- End GM Mode Tab Content -->
     </div>
 </div>
 
