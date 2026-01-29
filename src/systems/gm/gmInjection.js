@@ -2,6 +2,8 @@
  * GM Mode - Injection System
  * Handles injecting GM rulings into context for the main AI
  * Supports "ambient" mode (data only) vs "instructional" mode
+ *
+ * NEW: Unified mode combines UIE + RPG Companion data through Universe GM
  */
 
 import { extension_prompt_types, setExtensionPrompt } from '../../../../../../../script.js';
@@ -14,6 +16,7 @@ import {
 } from '../../core/state.js';
 import { getActiveFramework } from './frameworks.js';
 import { formatRollForGM } from './dice.js';
+import { buildUnifiedInjection, disableUIEInjection, checkUIEStatus } from './unifiedContext.js';
 
 // Extension prompt ID for GM injection
 const GM_INJECTION_ID = 'rpg-companion-gm-ruling';
@@ -290,5 +293,124 @@ export function getDefaultTemplates() {
         trackerContext: `<world_state>
 {{tracker_summary}}
 </world_state>`
+    };
+}
+
+// ============================================
+// UNIFIED INJECTION SYSTEM
+// Combines UIE + RPG Companion → Universe GM → Clean output
+// ============================================
+
+const UNIFIED_INJECTION_ID = 'rpg-companion-unified-context';
+
+/**
+ * Enable unified context mode
+ * This disables separate injections and uses our combined approach
+ */
+export async function enableUnifiedMode() {
+    const uieStatus = checkUIEStatus();
+
+    if (uieStatus.available && !uieStatus.injectionDisabled) {
+        console.log('[Unified Mode] UIE detected, disabling its direct injection...');
+        disableUIEInjection();
+    }
+
+    // Store that we're in unified mode
+    if (!extensionSettings.gmMode) {
+        extensionSettings.gmMode = {};
+    }
+    extensionSettings.gmMode.unifiedMode = true;
+
+    console.log('[Unified Mode] Enabled - all context will go through Universe GM');
+}
+
+/**
+ * Inject unified context (combines all sources)
+ * This is the ONE injection that Caleb sees
+ *
+ * @param {string} gmNarration - Optional GM narration of what happened
+ * @param {Object} diceRoll - Optional dice roll result
+ */
+export async function injectUnifiedContext(gmNarration = '', diceRoll = null) {
+    const settings = getInjectionSettings();
+
+    // Check if injection is disabled
+    if (settings.mode === 'disabled') {
+        console.log('[Unified Mode] Injection disabled, skipping');
+        return false;
+    }
+
+    // Build the unified context from all sources
+    const unifiedPrompt = await buildUnifiedInjection(gmNarration, diceRoll);
+
+    if (!unifiedPrompt) {
+        console.log('[Unified Mode] No context to inject');
+        return false;
+    }
+
+    // Store narration for reference
+    if (gmNarration) {
+        setLatestGMNarration(gmNarration);
+        addGMNarrationToHistory({
+            narration: gmNarration,
+            diceRoll,
+            timestamp: Date.now(),
+            unified: true
+        });
+    }
+
+    // Determine depth based on position setting
+    let depth = settings.depth || 1;
+    if (settings.position === 'after_user_message') {
+        depth = 0;
+    } else if (settings.position === 'before_user_message') {
+        depth = 1;
+    }
+
+    // Inject the SINGLE unified context
+    setExtensionPrompt(
+        UNIFIED_INJECTION_ID,
+        unifiedPrompt,
+        extension_prompt_types.IN_CHAT,
+        depth,
+        false
+    );
+
+    console.log('[Unified Mode] Injected unified context:', {
+        hasGMNarration: !!gmNarration,
+        hasDiceRoll: !!diceRoll,
+        length: unifiedPrompt.length
+    });
+
+    return true;
+}
+
+/**
+ * Clear unified injection
+ */
+export function clearUnifiedInjection() {
+    setExtensionPrompt(UNIFIED_INJECTION_ID, '', extension_prompt_types.IN_CHAT, 1, false);
+    clearGMNarrationHistory();
+    console.log('[Unified Mode] Cleared unified injection');
+}
+
+/**
+ * Check if unified mode is enabled
+ */
+export function isUnifiedModeEnabled() {
+    return extensionSettings.gmMode?.unifiedMode === true;
+}
+
+/**
+ * Get unified mode status for UI
+ */
+export function getUnifiedModeStatus() {
+    const uieStatus = checkUIEStatus();
+
+    return {
+        enabled: isUnifiedModeEnabled(),
+        uieAvailable: uieStatus.available,
+        uieInjectionDisabled: uieStatus.injectionDisabled,
+        mode: extensionSettings.gmMode?.injection?.mode || 'ambient'
     };
 }
