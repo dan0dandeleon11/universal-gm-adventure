@@ -323,8 +323,26 @@ export function setupGMModeEvents() {
     $(document).off('click.gm-change', '#rpg-gm-change-location');
     $(document).on('click.gm-change', '#rpg-gm-change-location', function(e) {
         e.preventDefault();
+        e.stopPropagation();
         console.log('[GM Mode UI] Change location clicked');
         showLocationPicker();
+    });
+
+    // GM Mode settings button - opens the main settings modal and scrolls to GM Mode section
+    $(document).off('click.gm-settings', '#rpg-gm-open-settings');
+    $(document).on('click.gm-settings', '#rpg-gm-open-settings', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('[GM Mode UI] GM Mode settings clicked');
+        // Open the settings modal
+        $('#rpg-settings-popup').show();
+        // Try to scroll to GM Mode section after a brief delay
+        setTimeout(() => {
+            const gmSection = document.getElementById('rpg-gm-settings-section');
+            if (gmSection) {
+                gmSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }, 100);
     });
 
     // Lock/unlock location button

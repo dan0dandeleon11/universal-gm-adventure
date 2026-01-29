@@ -12745,6 +12745,95 @@ body:has(.rpg-panel[data-theme="light"]) .rpg-strip-widget {
     width: 100%;
 }
 
+/* ============================================
+   GM MODE - MODAL STYLES
+   ============================================ */
+
+/* Modal Overlay */
+.rpg-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    backdrop-filter: blur(2px);
+}
+
+/* Modal Container */
+.rpg-modal {
+    background: var(--rpg-bg, rgba(26, 26, 46, 0.98));
+    border: 2px solid var(--rpg-border, #4a7ba7);
+    border-radius: 12px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    animation: rpg-modal-appear 0.2s ease-out;
+}
+
+@keyframes rpg-modal-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Modal Header */
+.rpg-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: var(--rpg-accent, rgba(22, 33, 62, 0.9));
+    border-bottom: 1px solid var(--rpg-border, #4a7ba7);
+}
+
+.rpg-modal-header span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--rpg-text, #eaeaea);
+}
+
+.rpg-modal-header i {
+    color: var(--rpg-highlight, #e94560);
+}
+
+/* Modal Close Button */
+.rpg-modal-close {
+    background: none;
+    border: none;
+    color: var(--rpg-text, #eaeaea);
+    opacity: 0.7;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 16px;
+    transition: all 0.2s;
+}
+
+.rpg-modal-close:hover {
+    opacity: 1;
+    color: var(--rpg-highlight, #e94560);
+}
+
+/* Modal Body */
+.rpg-modal-body {
+    padding: 16px;
+    overflow-y: auto;
+    max-height: calc(80vh - 60px);
+}
+
 /* Location Picker Modal */
 .rpg-gm-location-modal {
     max-width: 400px;
