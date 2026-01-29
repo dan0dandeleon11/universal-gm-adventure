@@ -188,7 +188,13 @@ import {
     injectGMRuling,
     clearGMInjection,
     previewInjection,
-    getDefaultTemplates
+    getDefaultTemplates,
+    // Unified context system
+    enableUnifiedMode,
+    injectUnifiedContext,
+    clearUnifiedInjection,
+    isUnifiedModeEnabled,
+    getUnifiedModeStatus
 } from './src/systems/gm/gmInjection.js';
 import {
     generateLocation,
@@ -1463,6 +1469,24 @@ function initGMModeUI() {
         extensionSettings.gmMode.enabled = $(this).prop('checked');
         saveSettings();
         $('#rpg-gm-mode-section').toggle(extensionSettings.gmMode.enabled);
+    });
+
+    // Unified Context Mode toggle
+    $('#rpg-toggle-unified-mode').prop('checked', gmSettings.unifiedMode || false).on('change', async function() {
+        if (!extensionSettings.gmMode) extensionSettings.gmMode = {};
+        const enabled = $(this).prop('checked');
+        extensionSettings.gmMode.unifiedMode = enabled;
+
+        if (enabled) {
+            // Enable unified mode - this also disables UIE's direct injection
+            await enableUnifiedMode();
+            toastr.success('Unified Context Mode enabled - UIE injection disabled');
+        } else {
+            // Just disable unified mode, UIE injection stays disabled
+            // (they can re-enable it manually in UIE settings if needed)
+            toastr.info('Unified Context Mode disabled');
+        }
+        saveSettings();
     });
 
     // Injection mode

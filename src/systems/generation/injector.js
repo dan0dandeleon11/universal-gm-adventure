@@ -30,6 +30,7 @@ import {
     SPOTIFY_FORMAT_INSTRUCTION
 } from './promptBuilder.js';
 import { restoreCheckpointOnLoad } from '../features/chapterCheckpoint.js';
+import { injectUnifiedContext, isUnifiedModeEnabled } from '../gm/gmInjection.js';
 
 // Track suppression state for event handler
 let currentSuppressionState = false;
@@ -610,6 +611,18 @@ export async function onGenerationStarted(type, data, dryRun) {
 
     // Ensure checkpoint is applied before generation
     await restoreCheckpointOnLoad();
+
+    // === UNIFIED CONTEXT INJECTION (UIE + RPG Companion → Universe GM → Caleb) ===
+    // If unified mode is enabled, inject the combined context from all sources
+    // This runs regardless of suppression since it's world state, not behavioral instructions
+    if (isUnifiedModeEnabled()) {
+        try {
+            await injectUnifiedContext();
+            console.log('[RPG Companion] Unified context injected for generation');
+        } catch (error) {
+            console.error('[RPG Companion] Failed to inject unified context:', error);
+        }
+    }
 
     const currentChatLength = chat ? chat.length : 0;
 
