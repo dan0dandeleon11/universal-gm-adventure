@@ -1309,13 +1309,14 @@ function initGMModeUI() {
 
         // Refresh GM Mode display when switching to it
         if (tabId === 'gm-mode') {
+            console.log('[RPG Companion GM] Switched to GM Mode tab, refreshing...');
             $('#rpg-gm-tab-container').html(createGMModeTabHTML());
-            setupGMModeEvents();
         }
     });
 
-    // Initialize GM Mode tab content and events
+    // Initialize GM Mode events (use document delegation so they work on static and dynamic content)
     setupGMModeEvents();
+    console.log('[RPG Companion GM] GM Mode events initialized');
 
     // === GM Send Turn Event (from GM Mode tab) ===
     $(document).on('rpg-gm-send-turn', async function(e) {

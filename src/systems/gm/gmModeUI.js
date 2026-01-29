@@ -263,6 +263,8 @@ function renderQueueSummary() {
  * Setup GM Mode UI event listeners
  */
 export function setupGMModeEvents() {
+    console.log('[GM Mode UI] Setting up event listeners...');
+
     // Unsubscribe from previous queue listener
     if (queueUnsubscribe) {
         queueUnsubscribe();
@@ -274,16 +276,28 @@ export function setupGMModeEvents() {
         refreshActionsDisplay();
     });
 
-    // Generate location button
-    $(document).off('click', '#rpg-gm-generate-location').on('click', '#rpg-gm-generate-location', function() {
+    // Generate location button - use event delegation on document
+    $(document).off('click.gm-generate', '#rpg-gm-generate-location');
+    $(document).on('click.gm-generate', '#rpg-gm-generate-location', function(e) {
+        e.preventDefault();
+        console.log('[GM Mode UI] Generate location clicked');
+
         const type = $('#rpg-gm-location-type').val();
+        console.log('[GM Mode UI] Location type:', type);
+
         const location = generateLocation(type);
+        console.log('[GM Mode UI] Generated location:', location);
 
         if (location) {
             saveLocation(location);
             setCurrentLocation(location.id);
             refreshGMModeDisplay();
-            toastr.success(`Arrived at ${location.name}`);
+
+            if (typeof toastr !== 'undefined') {
+                toastr.success(`Arrived at ${location.name}`);
+            }
+        } else {
+            console.error('[GM Mode UI] Failed to generate location');
         }
     });
 
