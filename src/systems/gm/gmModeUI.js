@@ -341,7 +341,7 @@ export function setupGMModeEvents() {
         $('#rpg-settings-popup').show();
         // Try to scroll to GM Mode section after a brief delay
         setTimeout(() => {
-            const gmSection = document.getElementById('rpg-gm-settings-section');
+            const gmSection = document.getElementById('rpg-gm-settings-group');
             if (gmSection) {
                 gmSection.scrollIntoView({ behavior: 'smooth' });
             }
@@ -388,8 +388,9 @@ export function setupGMModeEvents() {
             const result = await generateDynamicActions();
 
             if (result.success && result.actions.length > 0) {
-                // Update location with new actions
+                // Update location with new actions and save
                 location.actions = result.actions;
+                saveLocation(location);
                 refreshActionsDisplay();
 
                 if (result.ambientNote) {

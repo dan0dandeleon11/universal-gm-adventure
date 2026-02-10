@@ -7,7 +7,7 @@
 import { extensionSettings } from '../../core/state.js';
 import { saveSettings } from '../../core/persistence.js';
 import { callGMAPI } from './gmEngine.js';
-import { getCurrentLocation, getTimeOfDay, saveLocation, setCurrentLocation } from './locations.js';
+import { getCurrentLocation, getTimeOfDay, saveLocation } from './locations.js';
 
 // ============================================
 // GENERATION PROMPTS (defaults - user can override in settings)

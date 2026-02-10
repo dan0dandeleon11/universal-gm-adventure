@@ -1702,7 +1702,6 @@ function initGMModeUI() {
 
     // Reset action prompt to default
     $('#rpg-gm-action-prompt-reset').on('click', function() {
-        const defaults = getDefaultPrompts();
         $('#rpg-gm-action-prompt').val('');
         $('#rpg-gm-available-stats').val('');
         if (extensionSettings.gmMode) {
@@ -1715,7 +1714,6 @@ function initGMModeUI() {
 
     // Reset location prompt to default
     $('#rpg-gm-location-prompt-reset').on('click', function() {
-        const defaults = getDefaultPrompts();
         $('#rpg-gm-location-prompt').val('');
         if (extensionSettings.gmMode) {
             delete extensionSettings.gmMode.locationPrompt;
