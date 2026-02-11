@@ -3,7 +3,7 @@
  * Handles injecting GM rulings into context for the main AI
  * Supports "ambient" mode (data only) vs "instructional" mode
  *
- * NEW: Unified mode combines UIE + RPG Companion data through Universe GM
+ * Uses clean <world_state> tags - no behavioral instructions, just facts
  */
 
 import { extension_prompt_types, setExtensionPrompt } from '../../../../../../../script.js';
@@ -16,7 +16,7 @@ import {
 } from '../../core/state.js';
 import { getActiveFramework } from './frameworks.js';
 import { formatRollForGM } from './dice.js';
-import { buildUnifiedInjection, disableUIEInjection, checkUIEStatus } from './unifiedContext.js';
+import { buildUnifiedInjection } from './unifiedContext.js';
 
 // Extension prompt ID for GM injection
 const GM_INJECTION_ID = 'rpg-companion-gm-ruling';
@@ -298,30 +298,23 @@ export function getDefaultTemplates() {
 
 // ============================================
 // UNIFIED INJECTION SYSTEM
-// Combines UIE + RPG Companion → Universe GM → Clean output
+// Combines tracker + location + GM narration into one clean <world_state> block
 // ============================================
 
 const UNIFIED_INJECTION_ID = 'rpg-companion-unified-context';
 
 /**
  * Enable unified context mode
- * This disables separate injections and uses our combined approach
+ * All context goes through a single injection point
  */
 export async function enableUnifiedMode() {
-    const uieStatus = checkUIEStatus();
-
-    if (uieStatus.available && !uieStatus.injectionDisabled) {
-        console.log('[Unified Mode] UIE detected, disabling its direct injection...');
-        disableUIEInjection();
-    }
-
     // Store that we're in unified mode
     if (!extensionSettings.gmMode) {
         extensionSettings.gmMode = {};
     }
     extensionSettings.gmMode.unifiedMode = true;
 
-    console.log('[Unified Mode] Enabled - all context will go through Universe GM');
+    console.log('[RPG Companion GM] Unified mode enabled');
 }
 
 /**
@@ -405,12 +398,8 @@ export function isUnifiedModeEnabled() {
  * Get unified mode status for UI
  */
 export function getUnifiedModeStatus() {
-    const uieStatus = checkUIEStatus();
-
     return {
         enabled: isUnifiedModeEnabled(),
-        uieAvailable: uieStatus.available,
-        uieInjectionDisabled: uieStatus.injectionDisabled,
         mode: extensionSettings.gmMode?.injection?.mode || 'ambient'
     };
 }

@@ -21,30 +21,42 @@ Time: {{TIME_OF_DAY}}
 Player: {{PLAYER_STATS}}
 Recent: {{RECENT_EVENTS}}
 
-Generate 4-6 context-appropriate actions the player can take. Each action should:
-- Make sense for the current location and situation
-- Have a brief, quirky flavor text (1 sentence max, slightly playful but not over-the-top)
-- Include stat effects using ONLY the exact stat names listed below
-- Include risk level (none, low, medium, or high)
-- Occasionally include discovery of new locations (mark with discovers: "location_type")
+Generate 4-6 context-appropriate actions. Each action needs:
+- A brief flavor text (1 sentence, slightly playful)
+- Stat effects using ONLY these exact keys: time, energy, money, hp
+- Risk level: "none", "low", "medium", or "high"
+- Optionally discovers: "location_type" to unlock new areas
 
-CRITICAL - ONLY USE THESE EXACT STAT NAMES:
+STAT KEYS (use these exact names):
 {{AVAILABLE_STATS}}
 
-Respond in this exact JSON format:
+JSON format - use EXACTLY these field names:
 {
   "actions": [
     {
-      "id": "unique_id",
-      "name": "Action Name",
-      "flavor": "Brief quirky description.",
-      "time": 15,
+      "id": "explore_area",
+      "name": "Explore the area",
+      "flavor": "See what secrets this place holds.",
+      "time": 20,
       "energy": -5,
+      "money": 0,
+      "hp": 0,
+      "risk": "low",
+      "discovers": null
+    },
+    {
+      "id": "rest",
+      "name": "Take a rest",
+      "flavor": "Catch your breath.",
+      "time": 30,
+      "energy": 25,
+      "money": 0,
+      "hp": 10,
       "risk": "none",
       "discovers": null
     }
   ],
-  "ambient_note": "One sentence about something interesting in the environment."
+  "ambient_note": "One sentence about the environment."
 }`;
 
 const DEFAULT_LOCATION_PROMPT = `You are a game master creating a new location.
@@ -314,18 +326,24 @@ export async function generateDynamicActions() {
         // Sanitize and normalize actions
         if (parsed.actions) {
             parsed.actions = parsed.actions.map((action, idx) => {
-                // Normalize stat names (Kimi might use different names)
+                // Normalize stat names - handle various names the GM might use
                 const normalized = {
                     id: action.id || `dynamic_${Date.now()}_${idx}`,
                     name: action.name || 'Unknown Action',
-                    flavor: action.flavor || action.description || '',
-                    time: parseInt(action.time) || parseInt(action.duration) || parseInt(action.minutes) || 10,
-                    energy: parseInt(action.energy) || parseInt(action.stamina) || parseInt(action.fatigue) || 0,
-                    money: parseInt(action.money) || parseInt(action.cost) || parseInt(action.gold) || 0,
-                    hp: parseInt(action.hp) || parseInt(action.health) || parseInt(action.damage) || 0,
-                    risk: normalizeRisk(action.risk || action.danger || 'none'),
-                    discovers: action.discovers || action.unlocks || action.reveals || null
+                    flavor: action.flavor || action.description || action.text || '',
+                    time: safeParseInt(action.time, action.duration, action.minutes, action.time_cost) || 10,
+                    energy: safeParseInt(action.energy, action.stamina, action.energy_cost, action.fatigue, action.energy_change),
+                    money: safeParseInt(action.money, action.cost, action.gold, action.coins, action.money_cost, action.money_change),
+                    hp: safeParseInt(action.hp, action.health, action.damage, action.hp_change, action.health_change),
+                    risk: normalizeRisk(action.risk || action.danger || action.risk_level || 'none'),
+                    discovers: action.discovers || action.unlocks || action.reveals || action.discover || null
                 };
+
+                // Log if we had to normalize anything unusual
+                if (action.energy === undefined && action.stamina !== undefined) {
+                    console.log('[Dynamic Generator] Normalized stamina -> energy for:', action.name);
+                }
+
                 return normalized;
             });
         }
@@ -430,6 +448,21 @@ export async function executeAction(action) {
 // ============================================
 // HELPERS
 // ============================================
+
+/**
+ * Safely parse an integer from multiple possible field values
+ * Returns the first valid integer found, or 0 if none
+ */
+function safeParseInt(...values) {
+    for (const val of values) {
+        if (val === undefined || val === null) continue;
+        const parsed = parseInt(val, 10);
+        if (!isNaN(parsed)) {
+            return parsed;
+        }
+    }
+    return 0;
+}
 
 /**
  * Normalize risk level to expected values

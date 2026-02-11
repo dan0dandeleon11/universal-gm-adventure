@@ -1333,8 +1333,11 @@ function initGMModeUI() {
     console.log('[RPG Companion GM] GM Mode events initialized');
 
     // === GM Send Turn Event (from GM Mode tab) ===
-    $(document).on('rpg-gm-send-turn', async function(e) {
-        const { queue, summary } = e.detail || e.originalEvent?.detail || {};
+    // Use native addEventListener for CustomEvents dispatched via document.dispatchEvent()
+    document.addEventListener('rpg-gm-send-turn', async function(e) {
+        const { queue, summary } = e.detail || {};
+        console.log('[RPG Companion GM] Send turn event received:', { queueLength: queue?.length, summary });
+
         if (!queue || queue.length === 0) {
             toastr.warning('No actions in queue');
             return;
@@ -1349,10 +1352,19 @@ function initGMModeUI() {
             const queueContext = formatQueueForGM();
             const locationContext = formatLocationForGM(getCurrentLocation());
 
-            // Roll for the turn
-            const roll = rollForGM(1, 20, 0, 'Turn resolution');
+            console.log('[RPG Companion GM] Context built:', {
+                queueContext: queueContext.substring(0, 100) + '...',
+                locationContext: locationContext.substring(0, 100) + '...'
+            });
 
-            // Get any user message
+            // Roll for risky actions in the queue
+            let roll = null;
+            if (summary?.hasRiskyActions) {
+                roll = rollForGM(1, 20, 0, 'Risky action resolution');
+                console.log('[RPG Companion GM] Rolled for risky actions:', roll);
+            }
+
+            // Get any user message from the input
             const userMessage = $('#send_textarea').val() || '';
 
             // Process GM turn with queue context
@@ -1362,17 +1374,33 @@ function initGMModeUI() {
                 roll
             });
 
-            if (result.success) {
-                // Show narration preview
-                $('#rpg-gm-narration-content-tab').text(result.narration);
-                $('#rpg-gm-narration-preview').show();
+            console.log('[RPG Companion GM] Turn result:', { success: result.success, hasNarration: !!result.narration });
 
-                // Clear the queue
+            if (result.success) {
+                // Show narration in the GM Mode tab preview area
+                const $narrationContent = $('#rpg-gm-narration-content-tab');
+                const $narrationPreview = $('#rpg-gm-narration-preview');
+
+                if ($narrationContent.length) {
+                    $narrationContent.text(result.narration);
+                }
+                if ($narrationPreview.length) {
+                    $narrationPreview.show();
+                }
+
+                // Clear the queue after successful processing
                 clearQueue();
                 refreshGMModeDisplay();
 
-                toastr.success('GM ruling ready! Send your message to continue.');
+                // Show roll result if there was one
+                if (roll) {
+                    const rollMsg = `Rolled ${roll.modifiedTotal || roll.total} - ${roll.description}`;
+                    toastr.info(rollMsg, 'Dice Roll');
+                }
+
+                toastr.success('GM ruling injected! Send your message to continue.');
             } else {
+                console.error('[RPG Companion GM] Turn failed:', result.error);
                 toastr.error(result.error || 'Failed to process GM turn');
             }
         } catch (error) {
@@ -1486,12 +1514,9 @@ function initGMModeUI() {
         extensionSettings.gmMode.unifiedMode = enabled;
 
         if (enabled) {
-            // Enable unified mode - this also disables UIE's direct injection
             await enableUnifiedMode();
-            toastr.success('Unified Context Mode enabled - UIE injection disabled');
+            toastr.success('Unified Context Mode enabled');
         } else {
-            // Just disable unified mode, UIE injection stays disabled
-            // (they can re-enable it manually in UIE settings if needed)
             toastr.info('Unified Context Mode disabled');
         }
         saveSettings();

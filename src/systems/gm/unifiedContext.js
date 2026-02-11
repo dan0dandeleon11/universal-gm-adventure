@@ -1,54 +1,19 @@
 /**
  * Unified Context Collector
- * RPG Companion + GM Mode → Universe GM → Clean ambient output for Caleb
+ * RPG Companion + GM Mode → Clean ambient output for Caleb
  *
  * This is the "master context controller" that:
  * 1. Collects data from RPG Companion tracker (stats, NPCs, info)
  * 2. Collects data from GM Mode (locations, electronics, actions)
- * 3. Sends combined data to Universe GM for processing
- * 4. Outputs ONE clean <world_state> block with NO instructions
+ * 3. Outputs ONE clean <world_state> block with NO instructions
  *
- * Note: UIE integration is optional and kept as fallback only
+ * The GM talks TO the world, not TO Caleb.
+ * Caleb sees clean data and reacts naturally.
  */
 
 import { extensionSettings } from '../../core/state.js';
 import { getCurrentLocation, getElectronicsForLocation, getTimeOfDay } from './locations.js';
 import { getQueue, getQueueSummary } from './actionQueue.js';
-
-/**
- * Try to get UIE's context data
- * UIE exposes rootProtocolBlock() which builds its ambient context
- */
-async function getUIEContext() {
-    try {
-        // Check if UIE is loaded and has the rootProtocolBlock function
-        if (window.UIE?.rootProtocolBlock) {
-            const uieData = await window.UIE.rootProtocolBlock('');
-            return uieData || '';
-        }
-
-        // Alternative: try to import from UIE if it's a module
-        // This would require UIE to be in a known location
-        return '';
-    } catch (error) {
-        console.log('[Unified Context] UIE not available:', error.message);
-        return '';
-    }
-}
-
-/**
- * Get UIE's settings/state directly if available
- */
-function getUIEState() {
-    try {
-        if (window.UIE?.getSettings) {
-            return window.UIE.getSettings();
-        }
-        return null;
-    } catch (error) {
-        return null;
-    }
-}
 
 /**
  * Get RPG Companion tracker context
@@ -170,7 +135,7 @@ function getGMModeContext() {
             parts.push(`Time of day: ${timeOfDay}`);
         }
 
-        // Get queued actions
+        // Get queued actions (only if not already processed)
         const queue = getQueue();
         if (queue && queue.length > 0) {
             const actionList = queue.map((a, i) => `${i + 1}. ${a.name}`).join(', ');
@@ -210,17 +175,7 @@ function getDiceContext() {
 export async function collectUnifiedContext() {
     const sections = [];
 
-    // 1. Get UIE context (if available)
-    const uieContext = await getUIEContext();
-    if (uieContext) {
-        sections.push({
-            source: 'uie',
-            label: 'Game Systems',
-            content: uieContext
-        });
-    }
-
-    // 2. Get RPG Companion context
+    // 1. Get RPG Companion context
     const rpgContext = getRPGCompanionContext();
     if (rpgContext) {
         sections.push({
@@ -230,7 +185,7 @@ export async function collectUnifiedContext() {
         });
     }
 
-    // 3. Get GM Mode context
+    // 2. Get GM Mode context
     const gmContext = getGMModeContext();
     if (gmContext) {
         sections.push({
@@ -240,7 +195,7 @@ export async function collectUnifiedContext() {
         });
     }
 
-    // 4. Get dice context
+    // 3. Get dice context
     const diceContext = getDiceContext();
     if (diceContext) {
         sections.push({
@@ -312,7 +267,7 @@ ${parts.join('\n')}
 
 /**
  * Build the complete unified context for injection
- * This replaces BOTH UIE's and RPG Companion's separate injections
+ * This is the ONE injection that Caleb sees
  */
 export async function buildUnifiedInjection(gmNarration = '', diceResult = null) {
     // Collect all context
@@ -328,71 +283,4 @@ export async function buildUnifiedInjection(gmNarration = '', diceResult = null)
 
     // Create the final ambient output
     return formatAmbientOutput(gmNarration, diceResult, worldState.trim());
-}
-
-/**
- * Check if UIE is available and get its injection status
- */
-export function checkUIEStatus() {
-    try {
-        const hasUIE = !!(window.UIE || window.UIE_getSettings);
-        const uieSettings = getUIEState();
-        const injectionDisabled = uieSettings?.disableInjection === true;
-
-        return {
-            available: hasUIE,
-            injectionDisabled,
-            settings: uieSettings
-        };
-    } catch (error) {
-        return {
-            available: false,
-            injectionDisabled: false,
-            settings: null
-        };
-    }
-}
-
-/**
- * Disable UIE's direct injection (so we can control it)
- */
-export function disableUIEInjection() {
-    try {
-        if (window.UIE?.getSettings) {
-            const settings = window.UIE.getSettings();
-            if (settings) {
-                settings.disableInjection = true;
-                if (window.UIE.saveSettings) {
-                    window.UIE.saveSettings();
-                }
-                console.log('[Unified Context] Disabled UIE direct injection');
-                return true;
-            }
-        }
-    } catch (error) {
-        console.error('[Unified Context] Could not disable UIE injection:', error);
-    }
-    return false;
-}
-
-/**
- * Re-enable UIE's direct injection
- */
-export function enableUIEInjection() {
-    try {
-        if (window.UIE?.getSettings) {
-            const settings = window.UIE.getSettings();
-            if (settings) {
-                settings.disableInjection = false;
-                if (window.UIE.saveSettings) {
-                    window.UIE.saveSettings();
-                }
-                console.log('[Unified Context] Re-enabled UIE direct injection');
-                return true;
-            }
-        }
-    } catch (error) {
-        console.error('[Unified Context] Could not enable UIE injection:', error);
-    }
-    return false;
 }
