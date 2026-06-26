@@ -1,0 +1,11 @@
+{
+    "display_name": "RPG Companion: Co-Op GM Edition",
+    "loading_order": 100,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "Marinara, Lei, Subarashimo",
+    "version": "4.0.0-coop.1",
+    "homePage": "https://github.com/SpicyMarinara/rpg-companion-sillytavern"
+}

@@ -1,0 +1,376 @@
+<div>
+    <div class="inline-drawer">
+        <div class="inline-drawer-toggle inline-drawer-header">
+            <b><i class="fa-solid fa-dice-d20"></i> RPG Companion</b>
+            <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+        </div>
+        <div class="inline-drawer-content">
+            <label class="checkbox_label" for="rpg-extension-enabled">
+                <input type="checkbox" id="rpg-extension-enabled" />
+                <span data-i18n-key="settings.extensionEnabled">Enable RPG Companion</span>
+            </label>
+
+            <div class="form-group" style="margin-top: 10px;">
+                <label for="rpg-companion-language-select" data-i18n-key="settings.language.label">Language</label>
+                <select id="rpg-companion-language-select" class="text_pole">
+                    <option value="en" data-i18n-key="settings.language.option.en">English</option>
+                    <option value="zh-cn" data-i18n-key="settings.language.option.zh-cn">简体中文</option>
+                    <option value="zh-tw" data-i18n-key="settings.language.option.zh-tw">繁體中文</option>
+                    <option value="ru" data-i18n-key="settings.language.option.ru">Русский</option>
+                    <option value="fr" data-i18n-key="settings.language.option.fr">Français</option>
+                </select>
+            </div>
+
+            <small class="notes" data-i18n-key="settings.note">Toggle to enable/disable the RPG Companion extension.
+                Configure additional settings within the panel itself.</small>
+
+            <!-- GM Mode Settings -->
+            <hr style="margin: 12px 0; opacity: 0.3;">
+            <div style="margin-top: 8px;">
+                <b><i class="fa-solid fa-dungeon"></i> GM Mode</b>
+                <label class="checkbox_label" for="rpg-gm-enabled" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-gm-enabled" />
+                    <span>Enable GM Mode</span>
+                </label>
+                <label class="checkbox_label" for="rpg-gm-unified" style="margin-top: 4px;">
+                    <input type="checkbox" id="rpg-gm-unified" />
+                    <span>Unified Context (combine tracker + GM data)</span>
+                </label>
+                <small class="notes">GM Mode uses a separate API to generate world narration, location tracking, and
+                    game mechanics. Configure API connections in the in-panel Settings popup.</small>
+            </div>
+
+            <!-- Summarizer Settings -->
+            <hr style="margin: 12px 0; opacity: 0.3;">
+            <div style="margin-top: 8px;">
+                <b><i class="fa-solid fa-scroll"></i> Rolling Summary</b>
+                <label class="checkbox_label" for="rpg-summarizer-enabled" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-summarizer-enabled" />
+                    <span>Enable Rolling Summary</span>
+                </label>
+                <div class="form-group" style="margin-top: 6px;">
+                    <label for="rpg-summarizer-strategy">Beat Detection Strategy</label>
+                    <select id="rpg-summarizer-strategy" class="text_pole">
+                        <option value="fixed">Fixed interval</option>
+                        <option value="heuristic">Heuristic (state changes)</option>
+                        <option value="llm">LLM-based</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-top: 4px;">
+                    <label for="rpg-summarizer-depth">Summary Depth (higher = more stable for caching)</label>
+                    <input type="number" id="rpg-summarizer-depth" class="text_pole" min="1" max="50" value="10" />
+                </div>
+                <small class="notes">Injects a rolling story summary at a deep prompt position for Bedrock prefix
+                    caching stability. Recent beats are injected at a shallower depth.</small>
+            </div>
+
+            <!-- Co-Op Relay Settings -->
+            <hr style="margin: 12px 0; opacity: 0.3;">
+            <div style="margin-top: 8px;">
+                <b><i class="fa-solid fa-clipboard"></i> Co-Op Relay</b>
+                <label class="checkbox_label" for="rpg-coop-enabled" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-coop-enabled" />
+                    <span>Enable Co-Op Relay</span>
+                </label>
+                <label class="checkbox_label" for="rpg-coop-auto-clipboard" style="margin-top: 4px;">
+                    <input type="checkbox" id="rpg-coop-auto-clipboard" />
+                    <span>Auto-copy GM narration to clipboard</span>
+                </label>
+                <div class="form-group" style="margin-top: 6px;">
+                    <label for="rpg-coop-partner-name">Partner Character Name</label>
+                    <input type="text" id="rpg-coop-partner-name" class="text_pole" placeholder="Caleb" />
+                </div>
+                <small class="notes">Formats GM narration for clipboard relay to a partner SillyTavern instance
+                    running your character AI.</small>
+            </div>
+
+            <!-- Memory Recollection Settings -->
+            <hr style="margin: 12px 0; opacity: 0.3;">
+            <div style="margin-top: 8px;">
+                <b><i class="fa-solid fa-brain"></i> Memory Recollection</b>
+                <label class="checkbox_label" for="rpg-memory-enabled" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-memory-enabled" />
+                    <span>Enable Memory Recollection</span>
+                </label>
+                <div class="form-group" style="margin-top: 6px;">
+                    <label for="rpg-memory-batch-size">Batch Size (messages per summary)</label>
+                    <input type="number" id="rpg-memory-batch-size" class="text_pole" min="5" max="50" value="10" />
+                </div>
+                <div class="form-group" style="margin-top: 4px;">
+                    <label for="rpg-memory-lorebook">Target Lorebook Name</label>
+                    <input type="text" id="rpg-memory-lorebook" class="text_pole" placeholder="Memory Recollection" />
+                </div>
+                <small class="notes">Summarizes chat history into lorebook entries for automatic recall via keyword
+                    triggers.</small>
+            </div>
+
+            <!-- Lorebook Limiter Settings -->
+            <hr style="margin: 12px 0; opacity: 0.3;">
+            <div style="margin-top: 8px;">
+                <b><i class="fa-solid fa-filter"></i> Lorebook Limiter</b>
+                <label class="checkbox_label" for="rpg-lorebook-limiter-enabled" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-lorebook-limiter-enabled" />
+                    <span>Enable Lorebook Limiter</span>
+                </label>
+                <div class="form-group" style="margin-top: 6px;">
+                    <label for="rpg-lorebook-max-activations">Max Activations Per Generation</label>
+                    <input type="number" id="rpg-lorebook-max-activations" class="text_pole" min="1" max="100"
+                        value="10" />
+                </div>
+                <small class="notes">Caps the number of World Info entries activated per generation to prevent token
+                    bloat.</small>
+            </div>
+
+            <!-- Agent Pipeline Settings -->
+            <hr style="margin: 12px 0; opacity: 0.3;">
+            <div style="margin-top: 8px;">
+                <b><i class="fa-solid fa-network-wired"></i> Agent Pipeline</b>
+                <label class="checkbox_label" for="rpg-pipeline-enabled" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-pipeline-enabled" />
+                    <span>Enable Agent Pipeline</span>
+                </label>
+                <div class="form-group" style="margin-top: 6px;">
+                    <label for="rpg-pipeline-timeout">Agent Timeout (ms)</label>
+                    <input type="number" id="rpg-pipeline-timeout" class="text_pole" min="5000" max="120000" value="60000" />
+                </div>
+                <small class="notes">Orchestrates pre-generation, parallel, and post-processing agents. Required for Narrative Director, World State, and Scene Model.</small>
+            </div>
+
+            <!-- Narrative Director Settings -->
+            <hr style="margin: 12px 0; opacity: 0.3;">
+            <div style="margin-top: 8px;">
+                <b><i class="fa-solid fa-compass"></i> Narrative Director</b>
+                <label class="checkbox_label" for="rpg-narrative-director-enabled" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-narrative-director-enabled" />
+                    <span>Enable Narrative Director</span>
+                </label>
+                <div class="form-group" style="margin-top: 6px;">
+                    <label for="rpg-narrative-director-mode">Direction Mode</label>
+                    <select id="rpg-narrative-director-mode" class="text_pole">
+                        <option value="natural">Natural (push existing tension)</option>
+                        <option value="random">Random (surprising events)</option>
+                    </select>
+                </div>
+                <label class="checkbox_label" for="rpg-narrative-secret-plot" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-narrative-secret-plot" />
+                    <span>Enable Secret Plot Arc</span>
+                </label>
+                <div class="form-group" style="margin-top: 6px;">
+                    <label for="rpg-narrative-secret-interval">Secret Plot Check Interval (turns)</label>
+                    <input type="number" id="rpg-narrative-secret-interval" class="text_pole" min="2" max="50" value="8" />
+                </div>
+                <small class="notes">Pre-generation agent that creates story direction hooks. Use the "Push Story" button in the GM panel to trigger a narrative push.</small>
+            </div>
+
+            <!-- World State Agent Settings -->
+            <hr style="margin: 12px 0; opacity: 0.3;">
+            <div style="margin-top: 8px;">
+                <b><i class="fa-solid fa-globe"></i> World State Tracker</b>
+                <label class="checkbox_label" for="rpg-world-state-enabled" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-world-state-enabled" />
+                    <span>Enable World State Tracking</span>
+                </label>
+                <label class="checkbox_label" for="rpg-world-state-inject" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-world-state-inject" checked />
+                    <span>Inject State as Context</span>
+                </label>
+                <small class="notes">Post-processing agent that auto-tracks date, time, location, weather, temperature, and characters from the conversation.</small>
+            </div>
+
+            <!-- NPC System Settings -->
+            <hr style="margin: 12px 0; opacity: 0.3;">
+            <div style="margin-top: 8px;">
+                <b><i class="fa-solid fa-users"></i> NPC System</b>
+                <label class="checkbox_label" for="rpg-npc-enabled" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-npc-enabled" />
+                    <span>Enable NPC Tracking</span>
+                </label>
+                <div class="form-group" style="margin-top: 6px;">
+                    <label for="rpg-npc-max-tracked">Max Tracked NPCs</label>
+                    <input type="number" id="rpg-npc-max-tracked" class="text_pole" min="5" max="200" value="50" />
+                </div>
+                <label class="checkbox_label" for="rpg-npc-inject-relevant" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-npc-inject-relevant" checked />
+                    <span>Inject Relevant NPCs into Context</span>
+                </label>
+                <small class="notes">Tracks NPC profiles with reputation (-100 to +100). Relevant NPCs are injected into the prompt based on recent mentions.</small>
+            </div>
+
+            <!-- NPC Router Settings -->
+            <hr style="margin: 12px 0; opacity: 0.3;">
+            <div style="margin-top: 8px;">
+                <b><i class="fa-solid fa-comments"></i> NPC Dialogue Router</b>
+                <label class="checkbox_label" for="rpg-npc-router-enabled" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-npc-router-enabled" />
+                    <span>Enable NPC Routing</span>
+                </label>
+                <div class="form-group" style="margin-top: 6px;">
+                    <label for="rpg-npc-router-max-per-turn">Max NPCs per Turn</label>
+                    <input type="number" id="rpg-npc-router-max-per-turn" class="text_pole" min="1" max="10" value="3" />
+                </div>
+                <div class="form-group" style="margin-top: 6px;">
+                    <label for="rpg-npc-router-autonomy">Autonomy Mode</label>
+                    <select id="rpg-npc-router-autonomy" class="text_pole">
+                        <option value="reactive">Reactive (speak when mentioned)</option>
+                        <option value="proactive">Proactive (also speak if at same location)</option>
+                    </select>
+                </div>
+                <label class="checkbox_label" for="rpg-npc-router-rep-deltas" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-npc-router-rep-deltas" checked />
+                    <span>Auto-Apply Reputation Changes</span>
+                </label>
+                <label class="checkbox_label" for="rpg-npc-router-inject" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-npc-router-inject" checked />
+                    <span>Inject NPC Responses into Context</span>
+                </label>
+                <!-- NPC Router API Connection -->
+                <div style="margin-top: 8px; padding: 6px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;">
+                    <b style="font-size: 0.85em;"><i class="fa-solid fa-plug"></i> API Connection</b>
+                    <label class="checkbox_label" for="rpg-npc-router-use-gm" style="margin-top: 6px;">
+                        <input type="checkbox" id="rpg-npc-router-use-gm" checked />
+                        <span>Use GM API Connection</span>
+                    </label>
+                    <div id="rpg-npc-router-connection-fields" style="display: none; margin-top: 6px;">
+                        <div class="form-group" style="margin-top: 4px;">
+                            <label for="rpg-npc-router-endpoint">API Endpoint</label>
+                            <input type="text" id="rpg-npc-router-endpoint" class="text_pole" placeholder="https://api.anthropic.com/v1" />
+                        </div>
+                        <div class="form-group" style="margin-top: 4px;">
+                            <label for="rpg-npc-router-model">Model</label>
+                            <input type="text" id="rpg-npc-router-model" class="text_pole" placeholder="claude-sonnet-4-6-20250514" />
+                        </div>
+                        <div class="form-group" style="margin-top: 4px;">
+                            <label for="rpg-npc-router-temperature">Temperature</label>
+                            <input type="number" id="rpg-npc-router-temperature" class="text_pole" min="0" max="2" step="0.1" value="0.7" />
+                        </div>
+                        <div class="form-group" style="margin-top: 4px;">
+                            <label for="rpg-npc-router-max-tokens">Max Tokens</label>
+                            <input type="number" id="rpg-npc-router-max-tokens" class="text_pole" min="100" max="4000" value="500" />
+                        </div>
+                        <div class="form-group" style="margin-top: 4px;">
+                            <label for="rpg-npc-router-api-key">API Key</label>
+                            <input type="password" id="rpg-npc-router-api-key" class="text_pole" placeholder="sk-..." />
+                        </div>
+                    </div>
+                </div>
+                <small class="notes">Routes NPCs with a <code>personality</code> field to a separate LLM for independent dialogue generation. Reputation changes are applied N-1 (next turn) for swipe safety. Uncheck "Use GM API" to set a dedicated endpoint for NPC dialogue.</small>
+            </div>
+
+            <!-- Session Management Settings -->
+            <hr style="margin: 12px 0; opacity: 0.3;">
+            <div style="margin-top: 8px;">
+                <b><i class="fa-solid fa-book-open"></i> Session Management</b>
+                <label class="checkbox_label" for="rpg-sessions-enabled" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-sessions-enabled" />
+                    <span>Enable Session Management</span>
+                </label>
+                <label class="checkbox_label" for="rpg-sessions-auto-summary" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-sessions-auto-summary" checked />
+                    <span>Auto-Summarize on Session End</span>
+                </label>
+                <div class="form-group" style="margin-top: 6px;">
+                    <label for="rpg-sessions-carry-depth">Carry Forward Depth</label>
+                    <input type="number" id="rpg-sessions-carry-depth" class="text_pole" min="1" max="20" value="3" />
+                </div>
+                <small class="notes">Multi-session campaigns with summary carry-forward. Past session recaps are injected as campaign history.</small>
+            </div>
+
+            <!-- Campaign Planning Settings -->
+            <hr style="margin: 12px 0; opacity: 0.3;">
+            <div style="margin-top: 8px;">
+                <b><i class="fa-solid fa-scroll"></i> Campaign Planning</b>
+                <label class="checkbox_label" for="rpg-campaign-enabled" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-campaign-enabled" />
+                    <span>Enable Campaign Planning</span>
+                </label>
+                <small class="notes">Manage story arcs with plot points and pre-planned encounters. Active arc and pending encounters are injected into the GM prompt.</small>
+            </div>
+
+            <!-- Maps Settings -->
+            <hr style="margin: 12px 0; opacity: 0.3;">
+            <div style="margin-top: 8px;">
+                <b><i class="fa-solid fa-map"></i> Maps</b>
+                <label class="checkbox_label" for="rpg-maps-enabled" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-maps-enabled" />
+                    <span>Enable Map System</span>
+                </label>
+                <div class="form-group" style="margin-top: 6px;">
+                    <label for="rpg-maps-type">Map Type</label>
+                    <select id="rpg-maps-type" class="text_pole">
+                        <option value="overworld">Overworld Grid</option>
+                        <option value="dungeon">Dungeon Node Graph</option>
+                    </select>
+                </div>
+                <label class="checkbox_label" for="rpg-maps-fog" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-maps-fog" checked />
+                    <span>Fog of War</span>
+                </label>
+                <small class="notes">Overworld grid or dungeon node-graph with discovery tracking and fog of war. Map data is injected into the GM prompt.</small>
+            </div>
+
+            <!-- Scene Model Settings -->
+            <hr style="margin: 12px 0; opacity: 0.3;">
+            <div style="margin-top: 8px;">
+                <b><i class="fa-solid fa-palette"></i> Scene Model</b>
+                <label class="checkbox_label" for="rpg-scene-enabled" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-scene-enabled" />
+                    <span>Enable Scene Atmosphere</span>
+                </label>
+                <label class="checkbox_label" for="rpg-scene-use-gm" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-scene-use-gm" checked />
+                    <span>Use GM API Connection</span>
+                </label>
+                <label class="checkbox_label" for="rpg-scene-backgrounds" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-scene-backgrounds" checked />
+                    <span>Generate Backgrounds</span>
+                </label>
+                <label class="checkbox_label" for="rpg-scene-music" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-scene-music" />
+                    <span>Generate Music Suggestions</span>
+                </label>
+                <label class="checkbox_label" for="rpg-scene-sfx" style="margin-top: 6px;">
+                    <input type="checkbox" id="rpg-scene-sfx" />
+                    <span>Generate SFX Cues</span>
+                </label>
+                <small class="notes">Parallel agent that generates scene descriptions during main generation. Runs via separate API connection.</small>
+            </div>
+
+            <div style="margin-top: 10px; display: flex; gap: 10px;">
+                <a href="https://discord.com/invite/KdAkTg94ME" target="_blank" class="menu_button"
+                    style="flex: 1; text-align: center; text-decoration: none;">
+                    <i class="fa-brands fa-discord"></i>&nbsp;Discord
+                </a>
+                <a href="https://ko-fi.com/marinara_spaghetti" target="_blank" class="menu_button"
+                    style="flex: 1; text-align: center; text-decoration: none;">
+                    <i class="fa-solid fa-heart"></i>&nbsp;Support
+                </a>
+            </div>
+
+            <div style="margin-top: 15px; text-align: center; opacity: 0.7; font-size: 0.8em; line-height: 1.5;">
+                <div style="margin-bottom: 5px;">
+                    <i class="fa-solid fa-microchip"></i> <strong
+                        data-i18n="settings.recommendedModels.title">Recommended Models:</strong>
+                </div>
+                <div style="opacity: 0.8; font-size: 0.9em;" data-i18n="settings.recommendedModels.description">
+                    For the extension to work properly, <strong>it is not recommended to use any models below 20B,
+                        especially if they're old.</strong> It works best with the SOTA models such as Deepseek, Claude,
+                    GPT, or Gemini.
+                </div>
+            </div>
+
+            <div style="margin-top: 15px; text-align: center; opacity: 0.7; font-size: 0.8em; line-height: 1.5;">
+                <div style="margin-bottom: 5px;">
+                    <i class="fa-solid fa-users"></i> <strong>Contributors:</strong>
+                </div>
+                <div style="opacity: 0.8; font-size: 0.9em;">
+                    SpicyMarinara, Paperboygold, Munimunigamer, Subarashimo, Lei, Lilminzyu, Claude, IDeathByte,
+                    Chungchandev, Joenunezb, Amauragis, Tomt610, and Jakstein.
+                </div>
+            </div>
+
+            <div style="margin-top: 10px; text-align: center; opacity: 0.6; font-size: 0.85em;">
+                v4.0.0-coop.1
+            </div>
+        </div>
+    </div>
+</div>
