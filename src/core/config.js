@@ -6,13 +6,17 @@
 // Type imports
 /** @typedef {import('../types/inventory.js').InventoryV2} InventoryV2 */
 
-export const extensionName = 'third-party/rpg-companion-coop-gm';
-
 /**
- * Dynamically determine extension path based on current location
- * This supports both global (public/extensions) and user-specific (data/default-user/extensions) installations
+ * Derive the extension name from the actual install path so it works
+ * regardless of what the cloned folder is called.
+ * import.meta.url looks like:
+ *   .../scripts/extensions/third-party/FOLDER/src/core/config.js
+ *   .../data/default-user/extensions/third-party/FOLDER/src/core/config.js
  */
 const currentScriptPath = import.meta.url;
+const extMatch = currentScriptPath.match(/extensions\/(third-party\/[^/]+)\//);
+export const extensionName = extMatch ? extMatch[1] : 'third-party/universal-gm-adventure';
+
 const isUserExtension = currentScriptPath.includes('/data/') || currentScriptPath.includes('\\data\\');
 export const extensionFolderPath = isUserExtension
     ? `data/default-user/extensions/${extensionName}`

@@ -14,4 +14,16 @@ export {
     getRelevantNPCs,
     formatNPCsForInjection,
     findNPCByName,
+    tickAllNeeds,
+    addMemory,
+    getNPCContextSummary,
 } from './npcTracker.js';
+
+export {
+    createDefaultNeeds,
+    tickNeeds,
+    decide,
+    applyAction,
+    getUrgentNeed,
+    formatNeedsSummary,
+} from './utilityAI.js';

@@ -13,7 +13,7 @@
 
 import { extensionSettings } from '../../core/state.js';
 import { registerAgent, saveAgentMemory, getAgentMemory } from '../pipeline/index.js';
-import { getRelevantNPCs, adjustReputation, getReputationLabel } from '../npcs/index.js';
+import { getRelevantNPCs, adjustReputation, getReputationLabel, tickAllNeeds, addMemory, getNPCContextSummary } from '../npcs/index.js';
 
 const AGENT_ID = 'npc-router';
 const LOG = '[NPCRouter]';
@@ -41,26 +41,28 @@ async function execute(context) {
     const stored = getAgentMemory(AGENT_ID);
     if (!settings.enabled) return stored || { responses: [], deltasApplied: true };
 
-    // N-1: apply reputation deltas from previous turn
-    if (stored?.responses?.length && !stored.deltasApplied && settings.applyReputationDeltas) {
-        for (const r of stored.responses) {
-            if (r.id && r.reputationDelta) {
-                adjustReputation(r.id, r.reputationDelta);
+    // N-1: apply reputation deltas + commit dialogue memories from previous turn
+    if (stored?.responses?.length && !stored.deltasApplied) {
+        if (settings.applyReputationDeltas) {
+            for (const r of stored.responses) {
+                if (r.id && r.reputationDelta) {
+                    adjustReputation(r.id, r.reputationDelta);
+                }
             }
         }
+        commitDialogueMemories(stored.responses);
         saveAgentMemory(AGENT_ID, { ...stored, deltasApplied: true });
     }
+
+    // Tick utility AI for all NPCs — returns those choosing social actions
+    const socialNPCs = tickAllNeeds();
 
     // Find NPCs with personality defined that are mentioned in recent messages
     const msgs = (context.recentMessages || []).map(m => m.content);
     const relevant = getRelevantNPCs(msgs, settings.mentionThreshold)
         .filter(n => n.personality);
 
-    if (relevant.length === 0) {
-        return stored || { responses: [], deltasApplied: true };
-    }
-
-    // Proactive mode: also include NPCs at the same location (if world state knows)
+    // Proactive mode: also include NPCs at same location OR choosing social actions
     let candidates = [...relevant];
     if (settings.autonomy === 'proactive') {
         const worldState = context.agentMemory?.['world-state'];
@@ -74,6 +76,16 @@ async function execute(context) {
                 }
             }
         }
+        // NPCs whose utility AI chose a social action want to interact
+        for (const npc of socialNPCs) {
+            if (npc.personality && !candidates.find(c => c.id === npc.id)) {
+                candidates.push(npc);
+            }
+        }
+    }
+
+    if (candidates.length === 0) {
+        return getAgentMemory(AGENT_ID) || { responses: [], deltasApplied: true };
     }
 
     pendingNPCs = candidates.slice(0, settings.maxNPCsPerTurn);
@@ -102,6 +114,9 @@ function buildPrompt(context) {
         if (npc.location) lines.push(`  Location: ${npc.location}`);
         if (npc.status) lines.push(`  Status: ${npc.status}`);
         if (npc.notes) lines.push(`  Notes: ${npc.notes}`);
+        // Utility AI context (includes likes, dislikes, needs, current action, memories)
+        const summary = getNPCContextSummary(npc.id);
+        if (summary) lines.push(`  ${summary}`);
         lines.push('</npc>');
         return lines.join('\n');
     });
@@ -167,6 +182,21 @@ export function formatNPCResponsesForInjection() {
         });
 
     return `<npc_responses>\n${parts.join('\n')}\n</npc_responses>`;
+}
+
+// ─── Memory Commit ────────────────────────────────────
+
+/**
+ * Store dialogue from the last NPC response as memories on each NPC.
+ * Called by the N-1 delta application path so memories track one turn behind.
+ */
+function commitDialogueMemories(responses) {
+    if (!Array.isArray(responses)) return;
+    for (const r of responses) {
+        if (r?.id && r?.dialogue) {
+            addMemory(r.id, r.dialogue, 'dialogue');
+        }
+    }
 }
 
 // ─── Registration ──────────────────────────────────────────

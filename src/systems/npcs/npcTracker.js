@@ -6,6 +6,7 @@
 
 import { extensionSettings } from '../../core/state.js';
 import { chat_metadata, saveChatDebounced } from '../../../../../../../script.js';
+import { createDefaultNeeds, tickNeeds, decide, applyAction, formatNeedsSummary } from './utilityAI.js';
 
 // ─── Helpers ──────────────────────────────────────────────
 
@@ -80,6 +81,17 @@ export function addNPC(profile) {
         notes: profile.notes ?? '',
         personality: profile.personality ?? '',
         dialogueStyle: profile.dialogueStyle ?? '',
+        // Utility AI
+        needs: profile.needs ?? null,
+        currentAction: null,
+        lastTickTime: 0,
+        // Social model
+        affinity: profile.affinity ?? 50,
+        relationship: profile.relationship ?? 'associate',
+        thoughts: profile.thoughts ?? '',
+        likes: profile.likes ?? '',
+        dislikes: profile.dislikes ?? '',
+        memories: Array.isArray(profile.memories) ? [...profile.memories] : [],
     };
 
     npcs.push(entry);
@@ -201,6 +213,83 @@ export function formatNPCsForInjection(npcs) {
     });
 
     return `<known_npcs>\n${lines.join('\n')}\n</known_npcs>`;
+}
+
+// ─── Utility AI ──────────────────────────────────────
+
+/**
+ * Tick all NPCs' needs based on real elapsed time, run decide() for each,
+ * and persist once at the end. Returns NPCs whose chosen action is social.
+ * @returns {object[]} NPCs that want to interact (social action chosen).
+ */
+export function tickAllNeeds() {
+    const npcs = store();
+    const now = Date.now();
+    const socialNPCs = [];
+
+    for (const npc of npcs) {
+        if (!npc.needs) {
+            npc.needs = createDefaultNeeds();
+            npc.lastTickTime = now;
+            continue;
+        }
+
+        const elapsed = npc.lastTickTime ? (now - npc.lastTickTime) / 60000 : 0;
+        if (elapsed < 0.5) continue;
+
+        tickNeeds(npc.needs, elapsed);
+        npc.lastTickTime = now;
+
+        const action = decide(npc.needs);
+        npc.currentAction = action;
+        applyAction(npc.needs, action);
+
+        if (action.social) {
+            socialNPCs.push(npc);
+        }
+    }
+
+    persist();
+    return socialNPCs;
+}
+
+/**
+ * Add a memory entry to an NPC's memory log.
+ * Keeps the most recent 20 memories per NPC.
+ * @param {string} id
+ * @param {string} text
+ * @param {string} [type='event'] — 'event', 'dialogue', 'impression'
+ * @returns {boolean}
+ */
+export function addMemory(id, text, type = 'event') {
+    const npc = getNPC(id);
+    if (!npc) return false;
+    if (!Array.isArray(npc.memories)) npc.memories = [];
+    npc.memories.push({ text, type, turn: npc.lastSeenTurn, ts: Date.now() });
+    if (npc.memories.length > 20) npc.memories = npc.memories.slice(-20);
+    persist();
+    return true;
+}
+
+/**
+ * Get a compact summary of an NPC's current state for prompt building.
+ * @param {string} id
+ * @returns {string}
+ */
+export function getNPCContextSummary(id) {
+    const npc = getNPC(id);
+    if (!npc) return '';
+    const parts = [];
+    if (npc.currentAction) parts.push(`Currently: ${npc.currentAction.name}`);
+    if (npc.needs) parts.push(`Needs: ${formatNeedsSummary(npc.needs)}`);
+    if (npc.thoughts) parts.push(`Thinking: ${npc.thoughts}`);
+    if (npc.likes) parts.push(`Likes: ${npc.likes}`);
+    if (npc.dislikes) parts.push(`Dislikes: ${npc.dislikes}`);
+    if (npc.memories?.length) {
+        const recent = npc.memories.slice(-3).map(m => m.text).join('; ');
+        parts.push(`Recent memories: ${recent}`);
+    }
+    return parts.join('\n  ');
 }
 
 // ─── Search ───────────────────────────────────────────────
