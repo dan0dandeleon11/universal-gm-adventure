@@ -649,9 +649,6 @@ async function addExtensionSettings() {
  * Initializes the UI for the extension.
  */
 async function initUI() {
-    // Initialize i18n
-    await i18n.init();
-
     // Only initialize UI if extension is enabled
     if (!extensionSettings.enabled) {
         // console.log('[RPG Companion] Extension disabled - skipping UI initialization');
