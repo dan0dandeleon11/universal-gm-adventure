@@ -12722,13 +12722,101 @@ body.documentstyle .rpg-inline-thoughts {
     white-space: nowrap;
 }
 
-/* Location Picker Modal */
+/* ============================================
+   GENERIC MODAL SHELL (.rpg-modal-overlay / .rpg-modal)
+   Used by the GM location picker and other popups.
+   Without these the modal renders static at the end of
+   <body> and ends up stacked behind the chat bubbles.
+   ============================================ */
 
+.rpg-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
+    box-sizing: border-box;
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+}
+
+.rpg-modal {
+    background: var(--rpg-bg);
+    border: 2px solid var(--rpg-border);
+    border-radius: 0.75em;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    width: 100%;
+    max-width: min(90vw, 26em);
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.rpg-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5em;
+    padding: 0.75em 1em;
+    border-bottom: 2px solid var(--rpg-border);
+    font-weight: 600;
+    color: var(--rpg-highlight);
+    flex-shrink: 0;
+}
+
+.rpg-modal-header span {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.rpg-modal-close {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--rpg-border);
+    border-radius: 6px;
+    color: var(--rpg-text);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.rpg-modal-close:hover {
+    background: var(--rpg-highlight);
+    border-color: var(--rpg-highlight);
+    color: #fff;
+}
+
+.rpg-modal-close:active {
+    transform: scale(0.9);
+}
+
+.rpg-modal-body {
+    padding: 1em;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* Legacy picker overlay (kept for compatibility) */
 .rpg-gm-location-picker {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.6);
-    z-index: 9999;
+    z-index: 10000;
     display: flex;
     align-items: center;
     justify-content: center;
