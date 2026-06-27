@@ -194,6 +194,28 @@
                     </label>
                 </div>            </div>
 
+            <!-- Quick Controls Row -->
+            <div class="rpg-quick-controls">
+                <div class="rpg-quick-control">
+                    <label for="rpg-quick-gen-mode"><i class="fa-solid fa-wand-magic-sparkles"></i> Mode</label>
+                    <select id="rpg-quick-gen-mode" class="rpg-quick-select">
+                        <option value="together">Together</option>
+                        <option value="separate">Separate</option>
+                        <option value="external">External</option>
+                    </select>
+                </div>
+                <div class="rpg-quick-control">
+                    <label for="rpg-quick-depth"><i class="fa-solid fa-layer-group"></i> Depth</label>
+                    <input type="number" id="rpg-quick-depth" class="rpg-quick-input" min="1" max="20" value="4" />
+                </div>
+                <button id="rpg-open-settings" class="rpg-quick-settings-btn" title="Settings">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+                <button id="rpg-open-tracker-editor" class="rpg-quick-settings-btn" title="Edit Trackers">
+                    <i class="fa-solid fa-sliders"></i>
+                </button>
+            </div>
+
             <!-- GM Mode Tab Container (populated by gmModeUI.js when GM Mode is enabled) -->
             <div id="rpg-gm-tab-container" class="rpg-gm-tab-container" style="display: none;">
                 <!-- Content dynamically injected by refreshGMModeDisplay() -->
@@ -210,23 +232,11 @@
                 <div id="rpg-coop-relay-text" class="rpg-coop-relay-text"></div>
             </div>
 
-            <!-- Manual Update Button -->
+            <!-- Manual Update Button (hidden on mobile, replaced by header icon) -->
             <button id="rpg-manual-update" class="rpg-btn-primary rpg-manual-update-btn">
                 <i class="fa-solid fa-sync"></i> <span data-i18n-key="template.mainPanel.refreshRpgInfo">Refresh RPG
                     Info</span>
             </button>
-
-            <!-- Settings and Edit Trackers Buttons Row -->
-            <div class="rpg-settings-buttons-row">
-                <button id="rpg-open-tracker-editor" class="rpg-btn-settings rpg-btn-half">
-                    <i class="fa-solid fa-sliders"></i> <span data-i18n-key="template.mainPanel.editTrackersButton">Edit
-                        Trackers</span>
-                </button>
-                <button id="rpg-open-settings" class="rpg-btn-settings rpg-btn-half">
-                    <i class="fa-solid fa-gear"></i> <span
-                        data-i18n-key="template.mainPanel.settingsButton">Settings</span>
-                </button>
-            </div>
         </div>
     </div>
 </div>

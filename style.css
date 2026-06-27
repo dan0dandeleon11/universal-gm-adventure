@@ -4171,7 +4171,7 @@ body:has(.rpg-panel.rpg-position-left) #sheld {
     transform: translateY(0);
 }
 
-/* Settings buttons row (Edit Trackers + Settings side by side) */
+/* Settings buttons row (Edit Trackers + Settings side by side) — legacy, kept for compat */
 .rpg-settings-buttons-row {
     display: flex;
     gap: 0.5em;
@@ -4181,6 +4181,97 @@ body:has(.rpg-panel.rpg-position-left) #sheld {
 .rpg-btn-half {
     flex: 1;
     min-width: 0;
+}
+
+/* Quick Controls Row — mode, depth, settings/tracker buttons inline */
+.rpg-quick-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 4px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.rpg-quick-control {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+
+.rpg-quick-control label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--rpg-text);
+    opacity: 0.7;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    cursor: default;
+}
+
+.rpg-quick-control label i {
+    font-size: 10px;
+    color: var(--rpg-highlight);
+}
+
+.rpg-quick-select,
+.rpg-quick-input {
+    flex: 1;
+    min-width: 0;
+    max-width: 100px;
+    height: 28px;
+    padding: 2px 6px;
+    font-size: 12px;
+    background: var(--rpg-accent);
+    border: 1px solid var(--rpg-border);
+    border-radius: 4px;
+    color: var(--rpg-text);
+    box-sizing: border-box;
+}
+
+.rpg-quick-input {
+    max-width: 50px;
+    text-align: center;
+}
+
+.rpg-quick-select:focus,
+.rpg-quick-input:focus {
+    outline: none;
+    border-color: var(--rpg-highlight);
+}
+
+.rpg-quick-settings-btn {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--rpg-accent);
+    border: 1px solid var(--rpg-border);
+    border-radius: 6px;
+    color: var(--rpg-text);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.rpg-quick-settings-btn:hover {
+    background: var(--rpg-highlight);
+    border-color: var(--rpg-highlight);
+    color: #fff;
+}
+
+.rpg-quick-settings-btn:active {
+    transform: scale(0.9);
 }
 
 /* ============================================
@@ -6919,6 +7010,29 @@ body:has(.rpg-panel.rpg-mobile-open) .rpg-fab-widget-container {
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: 60px;
+    }
+
+    /* Quick controls — larger touch targets on mobile */
+    .rpg-quick-controls {
+        gap: 6px !important;
+        padding: 8px !important;
+    }
+
+    .rpg-quick-select,
+    .rpg-quick-input {
+        height: 36px !important;
+        font-size: 14px !important;
+    }
+
+    .rpg-quick-settings-btn {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        font-size: 16px !important;
+    }
+
+    .rpg-quick-control label {
+        font-size: 12px !important;
     }
 
     /* FIX #9: Prevent accidental keyboard pop on contenteditable */

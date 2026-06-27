@@ -704,13 +704,29 @@ async function initUI() {
     $('#rpg-update-depth').on('change', function() {
         const value = $(this).val();
         extensionSettings.updateDepth = parseInt(String(value));
+        $('#rpg-quick-depth').val(extensionSettings.updateDepth);
         saveSettings();
     });
 
     $('#rpg-generation-mode').on('change', async function() {
         extensionSettings.generationMode = String($(this).val());
+        $('#rpg-quick-gen-mode').val(extensionSettings.generationMode);
         saveSettings();
         updateGenerationModeUI();
+    });
+
+    // Quick controls (main panel) — synced with settings modal
+    $('#rpg-quick-gen-mode').on('change', function() {
+        extensionSettings.generationMode = String($(this).val());
+        $('#rpg-generation-mode').val(extensionSettings.generationMode);
+        saveSettings();
+        updateGenerationModeUI();
+    });
+
+    $('#rpg-quick-depth').on('change', function() {
+        extensionSettings.updateDepth = parseInt(String($(this).val()));
+        $('#rpg-update-depth').val(extensionSettings.updateDepth);
+        saveSettings();
     });
 
     $('#rpg-toggle-user-stats').on('change', function() {
@@ -1495,6 +1511,8 @@ async function initUI() {
     $('#rpg-toggle-auto-update').prop('checked', extensionSettings.autoUpdate);
     $('#rpg-position-select').val(extensionSettings.panelPosition);
     $('#rpg-update-depth').val(extensionSettings.updateDepth);
+    $('#rpg-quick-gen-mode').val(extensionSettings.generationMode);
+    $('#rpg-quick-depth').val(extensionSettings.updateDepth);
     $('#rpg-toggle-user-stats').prop('checked', extensionSettings.showUserStats);
     $('#rpg-toggle-info-box').prop('checked', extensionSettings.showInfoBox);
     $('#rpg-toggle-thoughts').prop('checked', extensionSettings.showCharacterThoughts);
