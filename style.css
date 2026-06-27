@@ -417,6 +417,33 @@ body:has(.rpg-panel.rpg-position-left) #sheld {
     flex-shrink: 0;
 }
 
+/* Header refresh icon — hidden on desktop (full button shown instead) */
+.rpg-header-refresh-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 1px solid var(--rpg-border);
+    border-radius: 6px;
+    color: var(--rpg-text);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.rpg-header-refresh-btn:hover {
+    background: var(--rpg-highlight);
+    border-color: var(--rpg-highlight);
+    color: #fff;
+}
+
+.rpg-header-refresh-btn:active {
+    transform: scale(0.9);
+}
+
 .rpg-panel-header h3 {
     margin: 0;
     font-size: clamp(1.25rem, 1.7vw, 1.75rem);
@@ -6756,6 +6783,157 @@ body:has(.rpg-panel.rpg-mobile-open) .rpg-fab-widget-container {
     .rpg-classic-stats-grid {
         grid-template-columns: repeat(3, 1fr) !important; /* 3 columns for attributes */
         grid-template-rows: repeat(2, 1fr) !important; /* 2 rows */
+    }
+
+    /* ========================================
+       MOBILE LAYOUT FIXES — VISUAL POLISH
+       ======================================== */
+
+    /* FIX #1: Stack stats + attributes vertically instead of cramped side-by-side */
+    .rpg-stats-content {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    .rpg-stats-left,
+    .rpg-stats-right {
+        flex: none !important;
+        width: 100% !important;
+    }
+
+    /* FIX #2: Touch-friendly D&D stat +/- buttons (44px minimum) */
+    .rpg-classic-stat-btn {
+        width: 40px !important;
+        height: 36px !important;
+        min-width: 40px !important;
+        min-height: 36px !important;
+        font-size: 16px !important;
+        border-radius: 6px !important;
+    }
+
+    .rpg-classic-stat {
+        padding: 8px !important;
+        gap: 4px !important;
+    }
+
+    .rpg-classic-stat-label {
+        font-size: 11px !important;
+    }
+
+    .rpg-classic-stat-value {
+        font-size: 14px !important;
+    }
+
+    .rpg-classic-stat-buttons {
+        gap: 8px !important;
+    }
+
+    /* FIX #5: Allow content box to scroll vertically */
+    .rpg-content-box {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* FIX #6: Readable minimum font sizes */
+    .rpg-stat-label {
+        font-size: 12px !important;
+        min-width: 60px !important;
+    }
+
+    .rpg-stat-value {
+        font-size: 12px !important;
+    }
+
+    .rpg-stat-bar {
+        height: 14px !important;
+        min-height: 14px !important;
+    }
+
+    .rpg-mood {
+        font-size: 13px !important;
+        padding: 8px !important;
+    }
+
+    .rpg-mood-emoji {
+        font-size: 18px !important;
+    }
+
+    .rpg-mood-conditions {
+        font-size: 13px !important;
+    }
+
+    .rpg-user-info-row {
+        font-size: 13px !important;
+        gap: 6px !important;
+        padding: 4px 0 !important;
+    }
+
+    .rpg-skills-section {
+        font-size: 13px !important;
+        padding: 8px !important;
+    }
+
+    /* FIX #4: Replace full-width refresh with header icon on mobile */
+    .rpg-manual-update-btn {
+        display: none !important;
+    }
+
+    .rpg-header-refresh-btn {
+        display: flex !important;
+    }
+
+    /* FIX #3: Feature toggles — 3-col grid with short labels visible */
+    .rpg-features-row {
+        display: grid !important;
+        grid-template-rows: none !important;
+        grid-auto-flow: row !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+        overflow-x: visible !important;
+        padding: 4px !important;
+    }
+
+    .rpg-feature-col {
+        min-width: 0 !important;
+    }
+
+    .rpg-toggle-container {
+        padding: 6px 4px !important;
+        border-radius: 6px !important;
+    }
+
+    .rpg-feature-col .rpg-toggle-label {
+        gap: 4px !important;
+        font-size: 11px !important;
+    }
+
+    .rpg-feature-col .rpg-toggle-label i {
+        font-size: 13px !important;
+    }
+
+    .rpg-feature-col .rpg-toggle-text {
+        display: inline !important;
+        font-size: 10px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 60px;
+    }
+
+    /* FIX #9: Prevent accidental keyboard pop on contenteditable */
+    .rpg-editable,
+    .rpg-editable-stat,
+    .rpg-editable-stat-name {
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    .rpg-editable:focus,
+    .rpg-editable-stat:focus,
+    .rpg-editable-stat-name:focus {
+        -webkit-user-select: text;
+        user-select: text;
     }
 }
 

@@ -1233,6 +1233,19 @@ async function initUI() {
         await updateRPGData(renderUserStats, renderInfoBox, renderThoughts, renderInventory);
     });
 
+    // Header refresh icon (mobile) — same as main refresh button
+    $('#rpg-header-refresh').on('click', async function() {
+        if (!extensionSettings.enabled) return;
+        const chat = getContext().chat;
+        for (let i = chat.length - 1; i >= 0; i--) {
+            if (!chat[i].is_user && !chat[i].is_system) {
+                commitTrackerDataFromPriorMessage(i);
+                break;
+            }
+        }
+        await updateRPGData(renderUserStats, renderInfoBox, renderThoughts, renderInventory);
+    });
+
     // Strip widget refresh button - same functionality as main refresh button
     $('#rpg-strip-refresh').on('click', async function() {
         if (!extensionSettings.enabled) {
