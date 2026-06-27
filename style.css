@@ -6919,11 +6919,70 @@ body:has(.rpg-panel.rpg-mobile-open) .rpg-fab-widget-container {
         gap: 8px !important;
     }
 
-    /* FIX #5: Allow content box to scroll vertically */
-    .rpg-content-box {
+    /* FIX #5: SINGLE-SCROLL — collapse nested scroll containers into one.
+       Previously content-box scrolled internally with flex:1, which ate all
+       panel height and pushed the GM buttons / refresh below an unreachable
+       fold, while 3 nested scrollers fought each other on touch (= jank). */
+
+    /* The ONE scroll container for the whole panel body */
+    #rpg-panel-content {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
         -webkit-overflow-scrolling: touch;
+    }
+
+    /* Content box flows at natural height — does NOT trap the scroll */
+    .rpg-content-box {
+        flex: 0 0 auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+    }
+
+    /* Sections + inner areas flow naturally, no independent scroll */
+    .rpg-section,
+    .rpg-stats-section,
+    .rpg-info-section,
+    .rpg-thoughts-section,
+    #rpg-user-stats,
+    #rpg-info-box,
+    .rpg-stats-content,
+    .rpg-stats-left,
+    .rpg-stats-right,
+    .rpg-stats-grid,
+    .rpg-info-content {
+        flex: 0 0 auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+    }
+
+    /* Mobile tab container + active tab at natural height */
+    .rpg-mobile-container {
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .rpg-mobile-tab-content.active {
+        flex: 0 0 auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+    }
+
+    /* Info tab grid → simple stacked flow on mobile */
+    .rpg-mobile-tab-content[data-tab-content="info"].active {
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .rpg-mobile-tab-content[data-tab-content="info"] > #rpg-info-box,
+    .rpg-mobile-tab-content[data-tab-content="info"] > .rpg-info-section,
+    .rpg-mobile-tab-content[data-tab-content="info"] > #rpg-thoughts,
+    .rpg-mobile-tab-content[data-tab-content="info"] > .rpg-thoughts-section {
+        overflow: visible !important;
+        min-height: 0 !important;
     }
 
     /* FIX #6: Readable minimum font sizes */
