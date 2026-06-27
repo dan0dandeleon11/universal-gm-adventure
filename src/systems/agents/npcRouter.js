@@ -46,7 +46,7 @@ async function execute(context) {
         if (settings.applyReputationDeltas) {
             for (const r of stored.responses) {
                 if (r.id && r.reputationDelta) {
-                    adjustReputation(r.id, r.reputationDelta);
+                    adjustReputation(r.id, r.reputationDelta, false);
                 }
             }
         }
@@ -55,7 +55,7 @@ async function execute(context) {
     }
 
     // Tick utility AI for all NPCs — returns those choosing social actions
-    const socialNPCs = tickAllNeeds();
+    const socialNPCs = tickAllNeeds(false);
 
     // Find NPCs with personality defined that are mentioned in recent messages
     const msgs = (context.recentMessages || []).map(m => m.content);
@@ -194,7 +194,7 @@ function commitDialogueMemories(responses) {
     if (!Array.isArray(responses)) return;
     for (const r of responses) {
         if (r?.id && r?.dialogue) {
-            addMemory(r.id, r.dialogue, 'dialogue');
+            addMemory(r.id, r.dialogue, 'dialogue', false);
         }
     }
 }

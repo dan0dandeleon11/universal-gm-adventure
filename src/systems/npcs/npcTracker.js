@@ -145,13 +145,14 @@ const clampRep = v => Math.max(-100, Math.min(100, Math.round(v)));
  * Adjust an NPC's reputation by a delta, clamped to [-100, 100].
  * @param {string} id
  * @param {number} delta
+ * @param {boolean} [shouldPersist=true] — pass false when batching multiple mutations
  * @returns {number|null} New reputation, or null if NPC not found.
  */
-export function adjustReputation(id, delta) {
+export function adjustReputation(id, delta, shouldPersist = true) {
     const npc = getNPC(id);
     if (!npc) return null;
     npc.reputation = clampRep(npc.reputation + delta);
-    persist();
+    if (shouldPersist) persist();
     return npc.reputation;
 }
 
@@ -222,7 +223,7 @@ export function formatNPCsForInjection(npcs) {
  * and persist once at the end. Returns NPCs whose chosen action is social.
  * @returns {object[]} NPCs that want to interact (social action chosen).
  */
-export function tickAllNeeds() {
+export function tickAllNeeds(shouldPersist = true) {
     const npcs = store();
     const now = Date.now();
     const socialNPCs = [];
@@ -249,7 +250,7 @@ export function tickAllNeeds() {
         }
     }
 
-    persist();
+    if (shouldPersist) persist();
     return socialNPCs;
 }
 
@@ -261,13 +262,13 @@ export function tickAllNeeds() {
  * @param {string} [type='event'] — 'event', 'dialogue', 'impression'
  * @returns {boolean}
  */
-export function addMemory(id, text, type = 'event') {
+export function addMemory(id, text, type = 'event', shouldPersist = true) {
     const npc = getNPC(id);
     if (!npc) return false;
     if (!Array.isArray(npc.memories)) npc.memories = [];
     npc.memories.push({ text, type, turn: npc.lastSeenTurn, ts: Date.now() });
     if (npc.memories.length > 20) npc.memories = npc.memories.slice(-20);
-    persist();
+    if (shouldPersist) persist();
     return true;
 }
 

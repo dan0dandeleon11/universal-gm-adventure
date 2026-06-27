@@ -39,7 +39,7 @@ const ACTIONS = [
  * @returns {object} Deep copy of default needs.
  */
 export function createDefaultNeeds() {
-    return JSON.parse(JSON.stringify(DEFAULT_NEEDS));
+    return structuredClone(DEFAULT_NEEDS);
 }
 
 /**
